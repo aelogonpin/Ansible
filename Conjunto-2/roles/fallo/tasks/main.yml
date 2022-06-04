@@ -1,0 +1,8 @@
+---
+#Forzar error en el caso de que algo no vaya bien
+
+- name: Chekear si el archivo existe
+  stat: 
+    path: /home/ansible/onichan
+  register: clavo_variable
+  failed_when: clavo_variable.stat.exists == False

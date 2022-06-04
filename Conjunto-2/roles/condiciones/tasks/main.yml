@@ -1,0 +1,24 @@
+---
+
+- name: Check if value exists
+  stat:
+    path: /home/ansible/clavo
+  register: clavo_variable
+
+#Debug
+- name: Debug if file
+  debug:
+    msg: "File exists!"
+  when: clavo_variable.stat.exists == True
+
+- name: Debug if file not exists
+  debug:
+    msg: "File not exist!"
+  when: clavo_variable.stat.exists == False
+
+- name: Crear archivo
+  file:
+    path: /home/ansible/clavo
+    state: touch
+  when: clavo_variable.stat.exists == False
+
