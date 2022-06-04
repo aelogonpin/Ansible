@@ -1,0 +1,15 @@
+Para ejecutar cual yml con necesidad de sudo incluir esto pls:
+
+Become command-line options
+
+--ask-become-pass, -K
+ask for privilege escalation password; does not imply become will be used. Note that this password will be used for all hosts.
+
+--become, -b
+run operations with become (no password implied)
+
+--become-method=BECOME_METHOD
+privilege escalation method to use (default=sudo), valid choices: [ sudo | su | pbrun | pfexec | doas | dzdo | ksu | runas | machinectl ]
+
+--become-user=BECOME_USER
+run operations as this user (default=root), does not imply –become/-b
