@@ -1,0 +1,16 @@
+---
+- hosts: webserver
+  remote_user: ipnotics
+  tasks: 
+    - name: Install last version of NGINX
+      apt: name=nginx state=latest
+      become: yes
+    - name: Start/Enable
+      service:
+        name: nginx
+        state: started
+        enabled: yes
+      become: yes
+    - name: Instalacion de curl
+      apt: name=curl state=latest
+      become: yes

@@ -1,0 +1,5 @@
+---
+- hosts: clients
+  remote_user: ansible
+  roles: 
+  - role: ansible
