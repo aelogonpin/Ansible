@@ -13,3 +13,11 @@ privilege escalation method to use (default=sudo), valid choices: [ sudo | su | 
 
 --become-user=BECOME_USER
 run operations as this user (default=root), does not imply –become/-b
+
+
+
+
+
+
+
+ansible-playbook -i inventory/hosts.ini --ask-become-pass main.yml 
