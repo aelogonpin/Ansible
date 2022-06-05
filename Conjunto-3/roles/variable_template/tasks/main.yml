@@ -1,0 +1,13 @@
+---
+#Copiar web Nginx
+- name: Copy nginx template
+  template: 
+    src: index.html.j2
+    dest: /var/www/html/index.html
+  become: yes
+
+- name: Reiniciar servicio
+  systemd:
+    name: nginx
+    state: restarted
+  become: yes

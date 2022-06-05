@@ -1,0 +1,6 @@
+---
+#Ignorar errores
+
+- name: Ignorar error
+  command: /bin/false
+  ignore_errors: yes

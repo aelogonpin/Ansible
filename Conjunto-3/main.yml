@@ -1,0 +1,11 @@
+---
+- hosts: webserver
+  remote_user: ansible
+  roles: 
+  - role: ansible
+  - role: variable
+  - role: condiciones
+#Este en el caso de que se quiera realizar un error de algo  - role: fallo
+  - role: ignorar
+  - role: variable_template
+  - role: bucle_template

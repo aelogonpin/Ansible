@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Nginx</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+  <p>Esta página web nginx pero con bucle template cosas modificadas de ansible desde el equipo/usuario {{ inventory_hostname }}.</p>
+<p>Aqui otra variable: {{ variable2 }}.</p>
+<p>Este esta en el grupo: [webserver] are {% for host in groups ['webserver']%} {{ hostvars[host]['ansible_hostname'] }}{%if not loop.last %},{% endif %} {% endfor %}
+ .</p>
+
+
+</body>
+</html>
+<!-- Esto es un comentario #Esto de WEBSERVER REPRESENTA EL NOMBRE DE GRUPOS DE LOS HOSTS DEL ARCHIVO QUE SE ENCUENTRA EN EL INVENTORY/HOSTS.INI
+#{% for host in groups ['webserver']%} </br>
+
+#{{ hostvars[host]['ansible_hostname'] }} </br>
+
+#{% endfor %}
+ -->
