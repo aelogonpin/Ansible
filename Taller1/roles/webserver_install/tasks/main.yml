@@ -1,0 +1,24 @@
+--- 
+- name: Install nginx
+  apt: name=nginx state=latest
+  become: yes
+
+- name: Copiar fichero de configuracion
+  template: 
+    src: index.nginx-debian.html.j2
+    dest: /var/www/html/index.nginx-debian.html
+    owner: "{{ ssh_user }}"
+    group: "{{ ssh_user }}"
+
+- name: Añadir linea adicional
+  lineinfile: dest=/var/www/html/index.nginx-debian.html line="<h2>Con el line in file</h2>" insertafter="Esta página"
+  become: yes
+
+- name: añadir un bloque con blockinfile
+  blockinfile:
+    dest: /var/www/html/index.nginx-debian.html
+    marker: <!--- {mark} ANSIBLE MANAGED BLOCK NGINX --->
+    insertafter: "Esta página"
+    block: |
+      <h2>Con el block in file</h2>
+  become: yes

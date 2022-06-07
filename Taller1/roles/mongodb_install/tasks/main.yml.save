@@ -1,0 +1,10 @@
+--- 
+
+- name: Actualizar los paquetes
+  apt: name=* state=
+  become: yes
+
+
+- name:Instalar MongoDB
+  apt: name=mongodb state=latest
+  become: yes

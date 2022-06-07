@@ -1,0 +1,5 @@
+--- 
+
+- name: Instalar mongodb
+  apt: name=mongodb state=latest update_cache=yes
+  become: yes

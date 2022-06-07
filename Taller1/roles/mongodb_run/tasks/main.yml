@@ -1,0 +1,7 @@
+--- 
+
+- name: Comenzar mongodb
+  service:
+    name: mongodb
+    state: started
+  become: yes
