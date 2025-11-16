@@ -1,4 +1,4 @@
-# Ansible Playbook - Configuración de Xubuntu 24.04 para Tiendas Clarel
+# Ansible Playbook - Configuración de Xubuntu 24.04 para Tiendas 
 
 Este proyecto de Ansible automatiza la configuración completa de imágenes de Xubuntu 24.04 para su uso en tiendas.
 
