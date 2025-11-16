@@ -1,0 +1,94 @@
+---
+- name: Configurar imagen Xubuntu 24.04 para tiendas
+  hosts: all
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+    - name: Mostrar información del sistema
+      ansible.builtin.debug:
+        msg: |
+          Sistema: {{ ansible_distribution }} {{ ansible_distribution_version }}
+          Hostname: {{ ansible_hostname }}
+          Arquitectura: {{ ansible_architecture }}
+
+    - name: Actualizar cache de APT
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+      changed_when: false
+
+  roles:
+    - role: base
+      tags: ['base', 'system']
+
+    - role: users
+      tags: ['users', 'security']
+
+    - role: security
+      tags: ['security']
+
+    - role: xfce_config
+      tags: ['xfce', 'desktop']
+
+    - role: software
+      tags: ['software', 'apps']
+
+    - role: printing
+      tags: ['printing', 'cups']
+
+    - role: services
+      tags: ['services']
+
+    - role: branding
+      tags: ['branding', 'custom']
+      when: branding_enabled | default(false)
+
+  post_tasks:
+    - name: Limpiar cache de APT
+      ansible.builtin.apt:
+        autoclean: true
+        autoremove: true
+
+    - name: Mostrar resumen de configuración
+      ansible.builtin.debug:
+        msg: |
+          ========================================
+          Configuración completada exitosamente
+          ========================================
+          Usuarios creados:
+            - soporte (con sudo y SSH key)
+            - tienda (protegido con contraseña)
+            - instalador (temporal, expira en {{ users.instalador.expire_days }} días)
+
+          Software instalado:
+            - Google Chrome
+            - CUPS (impresión)
+            - xinetd
+            - Rustdesk
+            - Alloy (detenido)
+            - Onboard (teclado virtual)
+
+          Configuración XFCE:
+            - Bloqueo de pantalla: {{ xfce_screen_lock_timeout }} minutos
+
+          Nota: Recuerda configurar el branding cuando esté disponible
+          ========================================
+
+    - name: Reiniciar el sistema para aplicar todos los cambios
+      ansible.builtin.shell: "sleep 2 && reboot"
+      async: 1
+      poll: 0
+      ignore_errors: true
+      tags: ['reboot']
+
+    - name: Mensaje final - Sistema reiniciando
+      ansible.builtin.debug:
+        msg: |
+          ========================================
+          ⚠️  SISTEMA REINICIANDO...
+          ========================================
+          El sistema se está reiniciando ahora.
+          Espera unos minutos y vuelve a conectar.
+          ========================================
+      tags: ['reboot']

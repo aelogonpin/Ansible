@@ -1,0 +1,121 @@
+---
+# Instalación de Onboard - Teclado virtual
+
+- name: Instalar Onboard (teclado virtual)
+  ansible.builtin.apt:
+    name:
+      - onboard
+      - onboard-data
+    state: present
+  tags: ['onboard']
+
+- name: Verificar instalación de Onboard
+  ansible.builtin.command: onboard --version
+  register: onboard_version_output
+  changed_when: false
+  failed_when: false
+  tags: ['onboard']
+
+- name: Mostrar versión de Onboard instalada
+  ansible.builtin.debug:
+    msg: "Onboard instalado: {{ onboard_version_output.stdout }}"
+  when: onboard_version_output.rc == 0
+  tags: ['onboard']
+
+- name: Crear directorio de configuración de Onboard
+  ansible.builtin.file:
+    path: "/home/{{ item }}/.config/onboard"
+    state: directory
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: '0755'
+  loop:
+    - soporte
+    - tienda
+    - instalador
+  tags: ['onboard']
+
+- name: Configurar Onboard con layout español
+  ansible.builtin.copy:
+    dest: "/home/{{ item }}/.config/onboard/onboard.conf"
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: '0644'
+    content: |
+      [main]
+      layout=Compact
+      theme=Nightshade
+      key-label-font=Ubuntu
+      key-label-overrides=
+      show-status-icon=True
+      start-minimized=False
+
+      [window]
+      window-state-sticky=True
+      window-decoration=False
+      force-to-top=True
+
+      [keyboard]
+      touch-input=single
+
+      [scanner]
+      enabled=False
+
+      [typing-assistance]
+      auto-show=False
+      auto-hide=True
+  loop:
+    - soporte
+    - tienda
+    - instalador
+  tags: ['onboard']
+
+- name: Crear acceso directo para Onboard en autostart (si está habilitado)
+  ansible.builtin.copy:
+    dest: "/home/{{ item }}/.config/autostart/onboard.desktop"
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: '0644'
+    content: |
+      [Desktop Entry]
+      Type=Application
+      Name=Onboard
+      Comment=Teclado virtual en pantalla
+      Exec=onboard
+      Icon=onboard
+      Terminal=false
+      Categories=GNOME;GTK;Utility;Accessibility;
+      X-GNOME-Autostart-enabled=true
+      X-GNOME-AutoRestart=true
+  loop:
+    - soporte
+    - tienda
+    - instalador
+  when: onboard_autostart | default(false)
+  tags: ['onboard', 'autostart']
+
+# DESHABILITADO: No se crea acceso directo de Onboard en escritorio
+# Se mantiene disponible en el menú de aplicaciones
+# - name: Crear acceso directo a Onboard en escritorio
+#   ansible.builtin.copy:
+#     dest: "/home/{{ item }}/Escritorio/onboard.desktop"
+#     owner: "{{ item }}"
+#     group: "{{ item }}"
+#     mode: '0755'
+#     content: |
+#       [Desktop Entry]
+#       Version=1.0
+#       Name=Teclado Virtual
+#       GenericName=On-Screen Keyboard
+#       Comment=Teclado en pantalla
+#       Exec=onboard
+#       Terminal=false
+#       Type=Application
+#       Icon=onboard
+#       Categories=Utility;Accessibility;
+#       StartupNotify=true
+#   loop:
+#     - soporte
+#     - tienda
+#     - instalador
+#   tags: ['onboard', 'desktop']

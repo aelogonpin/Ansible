@@ -1,0 +1,210 @@
+---
+# Role: xfce_config - Configuración del entorno de escritorio XFCE
+
+- name: Asegurar que XFCE está instalado
+  ansible.builtin.apt:
+    name:
+      - xfce4
+      - xfce4-goodies
+      - xfce4-screensaver
+      - xfce4-power-manager
+      - lightdm
+      - thunderbird-locale-es-es
+      - dconf-cli
+      - dconf-gsettings-backend
+    state: present
+  tags: ['xfce', 'packages']
+
+- name: Configurar LightDM como display manager por defecto
+  ansible.builtin.file:
+    src: /lib/systemd/system/lightdm.service
+    dest: /etc/systemd/system/display-manager.service
+    state: link
+    force: true
+  tags: ['xfce', 'lightdm']
+
+- name: Configurar Onboard para LightDM (permitir teclado virtual en pantalla de login)
+  ansible.builtin.shell: sudo -u lightdm dbus-launch gsettings set org.onboard.keyboard input-event-source 'GTK'
+  changed_when: true
+  ignore_errors: true
+  tags: ['xfce', 'lightdm', 'onboard']
+
+- name: Crear directorio de perfiles dconf
+  ansible.builtin.file:
+    path: /etc/dconf/profile
+    state: directory
+    mode: '0755'
+  tags: ['xfce', 'onboard']
+
+- name: Crear perfil de usuario dconf
+  ansible.builtin.copy:
+    dest: /etc/dconf/profile/user
+    mode: '0644'
+    content: |
+      user-db:user
+      system-db:local
+  tags: ['xfce', 'onboard']
+
+- name: Crear directorio de configuración global de dconf
+  ansible.builtin.file:
+    path: /etc/dconf/db/local.d
+    state: directory
+    mode: '0755'
+  tags: ['xfce', 'onboard']
+
+- name: Configuración global de Onboard (GTK en vez de XInput para todos los usuarios)
+  ansible.builtin.copy:
+    dest: /etc/dconf/db/local.d/00-onboard
+    mode: '0644'
+    content: |
+      # Configuración global de Onboard
+
+      # Teclado - Avanzados
+      # Cambiar fuente de evento de entrada a GTK para compatibilidad con bloqueo de sesión
+      [org/onboard/keyboard]
+      input-event-source='GTK'
+
+      # General
+      # Iniciar Onboard oculto (minimizado)
+      [org/onboard]
+      start-minimized=true
+
+      # Auto-show
+      # Mostrar automáticamente al editar texto
+      [org/onboard/auto-show]
+      enabled=true
+
+      # Icon Palette (icono flotante)
+      # Mostrar icono flotante cuando Onboard está oculto
+      [org/onboard/icon-palette]
+      in-use=true
+  tags: ['xfce', 'onboard']
+
+- name: Crear directorio de locks para dconf
+  ansible.builtin.file:
+    path: /etc/dconf/db/local.d/locks
+    state: directory
+    mode: '0755'
+  tags: ['xfce', 'onboard']
+
+- name: Bloquear configuración de Onboard (hacer obligatorio GTK para todos los usuarios)
+  ansible.builtin.copy:
+    dest: /etc/dconf/db/local.d/locks/onboard
+    mode: '0644'
+    content: |
+      # Bloquear la configuración de input-event-source de Onboard
+      # Esto evita que los usuarios cambien de GTK a XInput
+      /org/onboard/keyboard/input-event-source
+  tags: ['xfce', 'onboard']
+
+- name: Actualizar base de datos dconf
+  ansible.builtin.command: dconf update
+  changed_when: true
+  tags: ['xfce', 'onboard']
+
+- name: Sobrescribir configuración de autostart de Onboard para XFCE
+  ansible.builtin.copy:
+    dest: /etc/xdg/autostart/onboard-autostart.desktop
+    mode: '0644'
+    content: |
+      [Desktop Entry]
+      Name=Onboard
+      GenericName=Onboard onscreen keyboard
+      Comment=Flexible onscreen keyboard
+      Exec=onboard --startup-delay=3.0
+      Icon=onboard
+      Type=Application
+      NoDisplay=true
+      X-Ubuntu-Gettext-Domain=onboard
+      X-GNOME-AutoRestart=true
+      X-GNOME-Autostart-enabled=true
+  tags: ['xfce', 'onboard', 'autostart']
+
+- name: Crear directorio de configuración global de Xfconf
+  ansible.builtin.file:
+    path: /etc/xdg/xfce4/xfconf/xfce-perchannel-xml
+    state: directory
+    mode: '0755'
+  tags: ['xfce', 'screensaver', 'onboard']
+
+- name: Configurar teclado en pantalla para screensaver (global para todos los usuarios)
+  ansible.builtin.copy:
+    dest: /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-screensaver.xml
+    mode: '0644'
+    content: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <channel name="xfce4-screensaver" version="1.0">
+        <property name="saver" type="empty">
+          <property name="enabled" type="bool" value="true"/>
+          <property name="idle-activation" type="empty">
+            <property name="enabled" type="bool" value="true"/>
+          </property>
+        </property>
+        <property name="lock" type="empty">
+          <property name="enabled" type="bool" value="true"/>
+          <property name="embedded-keyboard" type="empty">
+            <property name="enabled" type="bool" value="true"/>
+            <property name="command" type="string" value="onboard -e"/>
+          </property>
+        </property>
+      </channel>
+  tags: ['xfce', 'screensaver', 'onboard']
+
+- name: Crear directorio de configuración XFCE para todos los usuarios
+  ansible.builtin.file:
+    path: "/home/{{ item }}/.config/xfce4/xfconf/xfce-perchannel-xml"
+    state: directory
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: '0755'
+    recurse: true
+  loop:
+    - soporte
+    - tienda
+    - instalador
+  tags: ['xfce', 'config']
+
+- name: Configurar idioma español en .xprofile para XFCE
+  ansible.builtin.copy:
+    dest: "/home/{{ item }}/.xprofile"
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: '0644'
+    content: |
+      # Configuración de idioma para XFCE
+      export LANG={{ system_locale }}
+      export LANGUAGE={{ system_locale.split('.')[0] }}
+      export LC_ALL={{ system_locale }}
+  loop:
+    - soporte
+    - tienda
+    - instalador
+  tags: ['xfce', 'locale']
+
+- name: Configurar idioma español en .profile
+  ansible.builtin.lineinfile:
+    path: "/home/{{ item }}/.profile"
+    line: "export LANG={{ system_locale }}"
+    regexp: "^export LANG="
+    create: true
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: '0644'
+  loop:
+    - soporte
+    - tienda
+    - instalador
+  tags: ['xfce', 'locale']
+
+#- name: Configurar screensaver para bloqueo automático (5 minutos)
+#  ansible.builtin.template:
+#    src: xfce4-screensaver.xml.j2
+#    dest: "/home/{{ item }}/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-screensaver.xml"
+#    owner: "{{ item }}"
+#    group: "{{ item }}"
+#    mode: '0644'
+#  loop:
+#    - soporte
+#    - tienda
+#    - instalador
+#  tags: ['xfce', 'screensaver']

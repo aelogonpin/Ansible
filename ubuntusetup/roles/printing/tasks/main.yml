@@ -1,0 +1,61 @@
+---
+# Role: printing - Configuración de CUPS e impresoras
+
+- name: Instalar CUPS y herramientas de impresión
+  ansible.builtin.apt:
+    name:
+      - cups
+      - cups-client
+      - cups-filters
+      - system-config-printer
+    state: present
+  tags: ['printing', 'cups']
+
+- name: Habilitar y arrancar servicio CUPS
+  ansible.builtin.systemd:
+    name: cups
+    enabled: true
+    state: started
+  tags: ['printing', 'cups']
+
+- name: Configurar CUPS - Permitir acceso desde localhost
+  ansible.builtin.lineinfile:
+    path: /etc/cups/cupsd.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    insertafter: "{{ item.insertafter | default(omit) }}"
+    state: present
+  loop:
+    - { regexp: '^Listen localhost:631', line: 'Listen localhost:631', insertafter: '^# Only listen' }
+    - { regexp: '^Listen /run/cups/cups.sock', line: 'Listen /run/cups/cups.sock', insertafter: '^Listen localhost' }
+  notify: restart cups
+  tags: ['printing', 'cups']
+
+- name: Configurar permisos de administración de CUPS
+  ansible.builtin.blockinfile:
+    path: /etc/cups/cupsd.conf
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - Admin access"
+    insertafter: '<Location /admin>'
+    block: |
+      Order allow,deny
+      Allow localhost
+      Require user @lpadmin
+  notify: restart cups
+  tags: ['printing', 'cups']
+
+- name: Agregar usuarios al grupo lpadmin (para administrar impresoras)
+  ansible.builtin.user:
+    name: "{{ item }}"
+    groups: lpadmin
+    append: true
+  loop:
+    - soporte
+    - tienda
+  tags: ['printing', 'users']
+
+- name: Crear directorio para drivers personalizados de impresoras
+  ansible.builtin.file:
+    path: /usr/share/ppd/custom
+    state: directory
+    mode: '0755'
+  tags: ['printing', 'drivers']

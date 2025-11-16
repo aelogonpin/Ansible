@@ -1,0 +1,15 @@
+---
+# Handlers para el role services
+
+- name: restart timesyncd
+  ansible.builtin.systemd:
+    name: systemd-timesyncd
+    state: restarted
+  listen: restart timesyncd
+
+- name: restart xinetd
+  ansible.builtin.systemd:
+    name: xinetd
+    state: restarted
+  listen: restart xinetd
+  when: xinetd_enabled | default(true)

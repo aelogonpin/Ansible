@@ -1,0 +1,407 @@
+---
+# Role: branding - Personalización corporativa
+
+- name: Crear directorio para recursos de branding
+  ansible.builtin.file:
+    path: /opt/clarel/branding
+    state: directory
+    mode: '0755'
+  tags: ['branding']
+
+- name: Crear subdirectorios para recursos
+  ansible.builtin.file:
+    path: "/opt/clarel/branding/{{ item }}"
+    state: directory
+    mode: '0755'
+  loop:
+    - wallpapers
+    - logos
+    - themes
+    - icons
+  tags: ['branding']
+
+- name: Copiar wallpaper corporativo a directorio de branding
+  ansible.builtin.copy:
+    src: image.png
+    dest: /opt/clarel/branding/wallpapers/clarel-wallpaper.png
+    mode: '0644'
+  tags: ['branding', 'wallpaper']
+
+- name: Crear README con instrucciones de branding
+  ansible.builtin.copy:
+    dest: /opt/clarel/branding/README.txt
+    mode: '0644'
+    content: |
+      CONFIGURACIÓN DE BRANDING CORPORATIVO
+      =====================================
+
+      Este directorio contiene los recursos de branding corporativo.
+
+      ESTRUCTURA:
+      -----------
+      /opt/clarel/branding/
+        ├── wallpapers/     - Fondos de pantalla corporativos
+        ├── logos/          - Logos de la empresa
+        ├── themes/         - Temas personalizados de XFCE
+        └── icons/          - Iconos corporativos
+
+      INSTRUCCIONES PARA CONFIGURAR BRANDING:
+      ----------------------------------------
+
+      1. Copiar los recursos proporcionados por marketing a los directorios correspondientes:
+         - Wallpapers: Copiar fondos de pantalla a wallpapers/
+         - Logos: Copiar logos a logos/
+         - Temas: Copiar temas de XFCE a themes/
+
+      2. Editar el archivo group_vars/all.yml y actualizar:
+         branding_enabled: true
+         branding_wallpaper: "nombre_del_wallpaper.jpg"
+         branding_logo: "nombre_del_logo.png"
+         branding_theme: "nombre_del_tema"
+
+      3. Volver a ejecutar el playbook:
+         ansible-playbook -i inventory/hosts playbook.yml --tags branding
+
+      RECURSOS RECOMENDADOS:
+      ----------------------
+      - Wallpapers: JPG o PNG, 1920x1080 o superior
+      - Logos: PNG con transparencia, varios tamaños
+      - Temas: Temas compatibles con XFCE 4.x
+
+      CONTACTO:
+      ---------
+      Para obtener los recursos de branding, contactar con el departamento de marketing.
+  tags: ['branding']
+
+- name: Crear directorio de configuración global de XFCE
+  ansible.builtin.file:
+    path: /etc/xdg/xfce4/xfconf/xfce-perchannel-xml
+    state: directory
+    mode: '0755'
+    recurse: true
+  tags: ['branding', 'wallpaper']
+
+- name: Configurar wallpaper GLOBAL en XFCE (para todos los usuarios presentes y futuros)
+  ansible.builtin.copy:
+    dest: /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
+    mode: '0644'
+    content: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <channel name="xfce4-desktop" version="1.0">
+        <property name="backdrop" type="empty">
+          <property name="screen0" type="empty">
+            <!-- Configuración para VMs (VirtualBox, VMware, QEMU) -->
+            <property name="monitorVirtual1" type="empty">
+              <property name="workspace0" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+              <property name="workspace1" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+              <property name="workspace2" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+              <property name="workspace3" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+            </property>
+            <!-- Configuración para hardware físico -->
+            <property name="monitor0" type="empty">
+              <property name="workspace0" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+              <property name="workspace1" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+              <property name="workspace2" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+              <property name="workspace3" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+            </property>
+            <!-- Configuración adicional para monitores HDMI/DisplayPort -->
+            <property name="monitorHDMI-1" type="empty">
+              <property name="workspace0" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+            </property>
+            <property name="monitorDP-1" type="empty">
+              <property name="workspace0" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+            </property>
+            <property name="monitorVGA-1" type="empty">
+              <property name="workspace0" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+            </property>
+          </property>
+        </property>
+      </channel>
+  tags: ['branding', 'wallpaper']
+
+# La configuración global en /etc/xdg/xfce4/ se aplica automáticamente a TODOS los usuarios
+# (existentes y futuros) cuando inician sesión en XFCE
+
+- name: Obtener el nombre del usuario con UID 1000
+  ansible.builtin.shell: "getent passwd 1000 | cut -d: -f1"
+  register: uid_1000_user
+  changed_when: false
+  failed_when: false
+  tags: ['branding', 'wallpaper']
+
+- name: Obtener el directorio home del usuario UID 1000
+  ansible.builtin.shell: "getent passwd 1000 | cut -d: -f6"
+  register: uid_1000_home
+  changed_when: false
+  failed_when: false
+  tags: ['branding', 'wallpaper']
+
+- name: Crear directorio de configuración XFCE para usuario UID 1000
+  ansible.builtin.file:
+    path: "{{ uid_1000_home.stdout }}/.config/xfce4/xfconf/xfce-perchannel-xml"
+    state: directory
+    owner: "{{ uid_1000_user.stdout }}"
+    group: "{{ uid_1000_user.stdout }}"
+    mode: '0755'
+    recurse: true
+  when: uid_1000_user.stdout != ""
+  tags: ['branding', 'wallpaper']
+
+- name: SOBRESCRIBIR configuración de wallpaper para usuario UID 1000 (forzar cambio)
+  ansible.builtin.copy:
+    dest: "{{ uid_1000_home.stdout }}/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml"
+    owner: "{{ uid_1000_user.stdout }}"
+    group: "{{ uid_1000_user.stdout }}"
+    mode: '0644'
+    force: true
+    content: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <channel name="xfce4-desktop" version="1.0">
+        <property name="backdrop" type="empty">
+          <property name="screen0" type="empty">
+            <!-- Configuración para VMs (VirtualBox, VMware, QEMU) -->
+            <property name="monitorVirtual1" type="empty">
+              <property name="workspace0" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+              <property name="workspace1" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+              <property name="workspace2" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+              <property name="workspace3" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+            </property>
+            <!-- Configuración para hardware físico -->
+            <property name="monitor0" type="empty">
+              <property name="workspace0" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+              <property name="workspace1" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+              <property name="workspace2" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+              <property name="workspace3" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+            </property>
+            <!-- Configuración adicional para monitores HDMI/DisplayPort -->
+            <property name="monitorHDMI-1" type="empty">
+              <property name="workspace0" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+            </property>
+            <property name="monitorDP-1" type="empty">
+              <property name="workspace0" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+            </property>
+            <property name="monitorVGA-1" type="empty">
+              <property name="workspace0" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+            </property>
+          </property>
+        </property>
+      </channel>
+  when: uid_1000_user.stdout != ""
+  tags: ['branding', 'wallpaper']
+
+- name: Verificar si existe configuración de LightDM GTK Greeter
+  ansible.builtin.stat:
+    path: /etc/lightdm/lightdm-gtk-greeter.conf
+  register: lightdm_conf
+  tags: ['branding', 'lightdm']
+
+- name: Asegurar que existe sección [greeter] en LightDM
+  ansible.builtin.lineinfile:
+    path: /etc/lightdm/lightdm-gtk-greeter.conf
+    line: "[greeter]"
+    create: true
+    mode: '0644'
+    state: present
+  tags: ['branding', 'lightdm']
+
+- name: Configurar wallpaper en pantalla de login LightDM
+  ansible.builtin.lineinfile:
+    path: /etc/lightdm/lightdm-gtk-greeter.conf
+    regexp: '^#?background='
+    line: "background=/opt/clarel/branding/wallpapers/clarel-wallpaper.png"
+    insertafter: '^\[greeter\]'
+    state: present
+  tags: ['branding', 'lightdm']
+
+- name: Configurar user-background=false en LightDM (forzar wallpaper corporativo)
+  ansible.builtin.lineinfile:
+    path: /etc/lightdm/lightdm-gtk-greeter.conf
+    regexp: '^#?user-background='
+    line: "user-background=false"
+    insertafter: '^\[greeter\]'
+    state: present
+  tags: ['branding', 'lightdm']
+
+- name: Configurar teclado en pantalla (Onboard) en LightDM
+  ansible.builtin.lineinfile:
+    path: /etc/lightdm/lightdm-gtk-greeter.conf
+    regexp: '^#?keyboard='
+    line: "keyboard=onboard"
+    insertafter: '^\[greeter\]'
+    state: present
+  tags: ['branding', 'lightdm', 'onboard']
+
+- name: Habilitar teclado en pantalla por defecto en LightDM
+  ansible.builtin.lineinfile:
+    path: /etc/lightdm/lightdm-gtk-greeter.conf
+    regexp: '^#?a11y-states='
+    line: "a11y-states=+keyboard"
+    insertafter: '^\[greeter\]'
+    state: present
+  tags: ['branding', 'lightdm', 'onboard']
+
+# Temas corporativos pueden agregarse en el futuro
+
+- name: Crear script de aplicación de branding
+  ansible.builtin.copy:
+    dest: /opt/scripts/aplicar-branding.sh
+    mode: '0755'
+    content: |
+      #!/bin/bash
+      # Script para aplicar branding corporativo
+
+      BRANDING_DIR="/opt/clarel/branding"
+
+      echo "======================================"
+      echo "  Aplicar Branding Corporativo"
+      echo "======================================"
+      echo ""
+
+      # Listar recursos disponibles
+      echo "Recursos disponibles:"
+      echo ""
+      echo "Wallpapers:"
+      ls -1 "$BRANDING_DIR/wallpapers/" 2>/dev/null || echo "  (ninguno)"
+      echo ""
+      echo "Logos:"
+      ls -1 "$BRANDING_DIR/logos/" 2>/dev/null || echo "  (ninguno)"
+      echo ""
+      echo "Temas:"
+      ls -1 "$BRANDING_DIR/themes/" 2>/dev/null || echo "  (ninguno)"
+      echo ""
+
+      echo "======================================"
+      echo ""
+      echo "Para aplicar branding:"
+      echo "1. Copiar recursos a $BRANDING_DIR"
+      echo "2. Editar group_vars/all.yml"
+      echo "3. Ejecutar: ansible-playbook playbook.yml --tags branding"
+      echo ""
+  tags: ['branding', 'tools']
+
+- name: Información sobre branding
+  ansible.builtin.debug:
+    msg: |
+      ✅ BRANDING CONFIGURADO
+
+      Wallpaper corporativo: /opt/clarel/branding/wallpapers/clarel-wallpaper.png
+
+      El wallpaper ha sido aplicado a:
+      - Todos los usuarios (soporte, tienda, instalador)
+      - Todos los workspaces de XFCE
+      - Pantalla de login de LightDM
+
+      Directorio de recursos: /opt/clarel/branding/
+      Script de ayuda: /opt/scripts/aplicar-branding.sh
+      Documentación: /opt/clarel/branding/README.txt
+  tags: ['branding']

@@ -1,0 +1,121 @@
+---
+# Role: users - Gestión de usuarios del sistema
+
+- name: Crear grupo común para usuarios de tienda
+  ansible.builtin.group:
+    name: clarel
+    state: present
+    gid: 2000
+  tags: ['groups']
+
+- name: Crear usuario soporte
+  ansible.builtin.user:
+    name: soporte
+    uid: "{{ users.soporte.uid }}"
+    groups: "{{ users.soporte.groups }}"
+    shell: "{{ users.soporte.shell }}"
+    comment: "{{ users.soporte.comment }}"
+    create_home: true
+    password: "{{ default_user_password }}"
+    state: present
+  tags: ['users', 'soporte']
+
+- name: Crear usuario tienda
+  ansible.builtin.user:
+    name: tienda
+    uid: "{{ users.tienda.uid }}"
+    groups: "{{ users.tienda.groups }},clarel"
+    shell: "{{ users.tienda.shell }}"
+    comment: "{{ users.tienda.comment }}"
+    create_home: true
+    password: "{{ default_user_password }}"
+    state: present
+  tags: ['users', 'tienda']
+
+- name: Crear usuario instalador
+  ansible.builtin.user:
+    name: instalador
+    uid: "{{ users.instalador.uid }}"
+    groups: "{{ users.instalador.groups }},clarel"
+    shell: "{{ users.instalador.shell }}"
+    comment: "{{ users.instalador.comment }}"
+    create_home: true
+    password: "{{ default_user_password }}"
+    state: present
+  tags: ['users', 'instalador']
+
+- name: Configurar expiración de cuenta para usuario instalador
+  ansible.builtin.command:
+    cmd: "chage -M {{ users.instalador.expire_days }} -W 7 instalador"
+  changed_when: true
+  tags: ['users', 'instalador', 'security']
+
+- name: Crear directorio .ssh para usuario soporte
+  ansible.builtin.file:
+    path: /home/soporte/.ssh
+    state: directory
+    owner: soporte
+    group: soporte
+    mode: '0700'
+  tags: ['users', 'soporte', 'ssh']
+
+- name: Agregar clave SSH pública para usuario soporte
+  ansible.builtin.authorized_key:
+    user: soporte
+    state: present
+    key: "{{ lookup('file', 'soporte_id_rsa.pub') }}"
+    manage_dir: true
+  when: users.soporte.ssh_key_enabled
+  tags: ['users', 'soporte', 'ssh']
+  ignore_errors: true  # Por si no existe el archivo aún
+
+- name: Configurar sudoers para usuario soporte
+  ansible.builtin.template:
+    src: sudoers.j2
+    dest: /etc/sudoers.d/soporte
+    mode: '0440'
+    validate: 'visudo -cf %s'
+  tags: ['users', 'soporte', 'sudo']
+
+# NOTA: Root solo se deshabilita en SSH (ver roles/security/tasks/main.yml)
+# NO deshabilitamos el shell de root para permitir 'sudo su' en consola local
+# - name: Deshabilitar login de root
+#   ansible.builtin.user:
+#     name: root
+#     password: '!'
+#     shell: /usr/sbin/nologin
+#   when: disable_root_login | default(true)
+#   tags: ['users', 'security', 'root']
+
+- name: Configurar umask por defecto para usuarios
+  ansible.builtin.lineinfile:
+    path: /etc/login.defs
+    regexp: '^UMASK'
+    line: 'UMASK           022'
+    state: present
+  tags: ['users', 'security']
+
+- name: Crear directorios comunes en /home para usuarios
+  ansible.builtin.file:
+    path: "/home/{{ item.name }}/{{ item.dir }}"
+    state: directory
+    owner: "{{ item.name }}"
+    group: "{{ item.name }}"
+    mode: '0755'
+  loop:
+    - { name: 'soporte', dir: 'Documentos' }
+    - { name: 'soporte', dir: 'Descargas' }
+    - { name: 'tienda', dir: 'Documentos' }
+    - { name: 'tienda', dir: 'Descargas' }
+    - { name: 'instalador', dir: 'Documentos' }
+    - { name: 'instalador', dir: 'Descargas' }
+  tags: ['users', 'directories']
+
+- name: Mostrar información de usuarios creados
+  ansible.builtin.debug:
+    msg: |
+      Usuarios configurados:
+        - soporte: UID {{ users.soporte.uid }}, grupos: {{ users.soporte.groups }}
+        - tienda: UID {{ users.tienda.uid }}, grupos: {{ users.tienda.groups }}
+        - instalador: UID {{ users.instalador.uid }}, expira en {{ users.instalador.expire_days }} días
+  tags: ['users']

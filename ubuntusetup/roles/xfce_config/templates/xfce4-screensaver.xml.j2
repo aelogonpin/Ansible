@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<channel name="xfce4-screensaver" version="1.0">
+  <property name="saver" type="empty">
+    <property name="mode" type="int" value="1"/>
+    <property name="idle-activation" type="empty">
+      <property name="enabled" type="bool" value="true"/>
+      <property name="delay" type="int" value="{{ xfce_screen_lock_timeout }}"/>
+    </property>
+  </property>
+  <property name="lock" type="empty">
+    <property name="enabled" type="bool" value="true"/>
+    <property name="saver-activation" type="empty">
+      <property name="enabled" type="bool" value="true"/>
+      <property name="delay" type="int" value="0"/>
+    </property>
+  </property>
+  <property name="themes" type="empty">
+    <property name="list" type="empty">
+      <property name="floaters" type="empty">
+        <property name="name" type="string" value="Floating Xfce"/>
+      </property>
+    </property>
+  </property>
+</channel>

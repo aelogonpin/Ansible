@@ -1,0 +1,10 @@
+[xubuntu_image]
+# Para construir la imagen localmente
+# localhost ansible_connection=local
+
+[tiendas]
+# Máquina de prueba
+xubuntu-test ansible_host=192.168.1.156 ansible_user=ipnotics ansible_password=xxxxx ansible_become_password=xxxx
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3

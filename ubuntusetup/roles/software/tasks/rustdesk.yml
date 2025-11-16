@@ -1,0 +1,150 @@
+---
+# Instalación de Rustdesk - Acceso remoto
+
+- name: Obtener información de la última versión de Rustdesk desde GitHub
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/rustdesk/rustdesk/releases/latest
+    return_content: true
+  register: rustdesk_latest_release
+  tags: ['rustdesk']
+
+- name: Establecer versión de Rustdesk desde tag_name
+  ansible.builtin.set_fact:
+    rustdesk_actual_version: "{{ rustdesk_latest_release.json.tag_name }}"
+  tags: ['rustdesk']
+
+- name: Mostrar versión de Rustdesk que se instalará
+  ansible.builtin.debug:
+    msg: "Se instalará Rustdesk versión: {{ rustdesk_actual_version }}"
+  tags: ['rustdesk']
+
+- name: Construir URL de descarga de Rustdesk
+  ansible.builtin.set_fact:
+    rustdesk_download_url: "https://github.com/rustdesk/rustdesk/releases/download/{{ rustdesk_actual_version }}/rustdesk-{{ rustdesk_actual_version }}-x86_64.deb"
+  tags: ['rustdesk']
+
+- name: Mostrar URL de descarga
+  ansible.builtin.debug:
+    msg: "URL de descarga: {{ rustdesk_download_url }}"
+  tags: ['rustdesk']
+
+- name: Descargar Rustdesk
+  ansible.builtin.get_url:
+    url: "{{ rustdesk_download_url }}"
+    dest: /tmp/rustdesk.deb
+    mode: '0644'
+  tags: ['rustdesk']
+  ignore_errors: true
+
+- name: Instalar dependencias de Rustdesk
+  ansible.builtin.apt:
+    name:
+      - libgtk-3-0
+      - libxcb-randr0
+      - libxdo3
+      - libxfixes3
+      - libxcb-shape0
+      - libxcb-xfixes0
+      - libasound2t64           # En Ubuntu 24.04 es libasound2t64
+      - libsystemd0
+      - curl
+      - libva-drm2
+      - libva-x11-2
+      - libvdpau1
+      - libgstreamer-plugins-base1.0-0
+      - libpam0g
+      - gstreamer1.0-pipewire
+      - libayatana-appindicator3-1  # Recomendado
+    state: present
+  tags: ['rustdesk']
+
+- name: Instalar Rustdesk desde .deb
+  ansible.builtin.apt:
+    deb: /tmp/rustdesk.deb
+    state: present
+  tags: ['rustdesk']
+  ignore_errors: true
+
+- name: Verificar si Rustdesk está instalado
+  ansible.builtin.stat:
+    path: /usr/bin/rustdesk
+  register: rustdesk_installed
+  tags: ['rustdesk']
+
+- name: Mostrar información de Rustdesk
+  ansible.builtin.debug:
+    msg: "Rustdesk instalado correctamente en /usr/bin/rustdesk"
+  when: rustdesk_installed.stat.exists
+  tags: ['rustdesk']
+
+- name: Crear directorio de configuración de Rustdesk
+  ansible.builtin.file:
+    path: "/home/{{ item }}/.config/rustdesk"
+    state: directory
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: '0755'
+  loop:
+    - soporte
+    - tienda
+    - instalador
+  tags: ['rustdesk']
+
+- name: Configurar Rustdesk (configuración básica)
+  ansible.builtin.copy:
+    dest: "/home/{{ item }}/.config/rustdesk/RustDesk2.toml"
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: '0644'
+    content: |
+      # Configuración básica de Rustdesk
+      # Generado por Ansible
+
+      # Esta configuración puede ser personalizada según necesidades
+      [options]
+      custom-rendezvous-server = ''
+      relay-server = ''
+      api-server = ''
+      key = ''
+  loop:
+    - soporte
+    - tienda
+    - instalador
+  tags: ['rustdesk']
+
+- name: Crear servicio systemd para Rustdesk
+  ansible.builtin.copy:
+    dest: /usr/lib/systemd/system/rustdesk.service
+    mode: '0644'
+    content: |
+      [Unit]
+      Description=RustDesk
+      Requires=network.target
+      After=systemd-user-sessions.service
+
+      [Service]
+      Type=simple
+      ExecStart=/usr/bin/rustdesk --service
+      # kill --tray and --server both
+      ExecStop=/usr/bin/pkill -f "rustdesk --"
+      # below two lines do not work, have to use above one line
+      #ExecStop=/usr/bin/pkill -f "rustdesk --tray"
+      #ExecStop=/usr/bin/pkill -f "rustdesk --server"
+      PIDFile=/run/rustdesk.pid
+      KillMode=mixed
+      TimeoutStopSec=30
+      User=root
+      LimitNOFILE=100000
+
+      [Install]
+      WantedBy=multi-user.target
+  tags: ['rustdesk', 'service']
+
+- name: Habilitar servicio de Rustdesk
+  ansible.builtin.systemd:
+    name: rustdesk
+    enabled: true
+    daemon_reload: true
+  tags: ['rustdesk', 'service']
+  ignore_errors: true
+

@@ -1,0 +1,8 @@
+---
+# Handlers para el role security
+
+- name: restart ssh
+  ansible.builtin.systemd:
+    name: ssh
+    state: restarted
+  listen: restart ssh

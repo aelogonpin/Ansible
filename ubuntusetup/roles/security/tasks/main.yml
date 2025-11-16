@@ -1,0 +1,73 @@
+---
+# Role: security - Configuración de seguridad del sistema
+
+- name: Configurar SSH - deshabilitar autenticación por contraseña
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+  loop:
+    - { regexp: '^#?PasswordAuthentication', line: 'PasswordAuthentication no' }
+    - { regexp: '^#?PermitRootLogin', line: 'PermitRootLogin no' }
+    - { regexp: '^#?PubkeyAuthentication', line: 'PubkeyAuthentication yes' }
+    - { regexp: '^#?ChallengeResponseAuthentication', line: 'ChallengeResponseAuthentication no' }
+    - { regexp: '^#?UsePAM', line: 'UsePAM yes' }
+    - { regexp: '^#?X11Forwarding', line: 'X11Forwarding yes' }
+  notify: restart ssh
+  tags: ['security', 'ssh']
+  when: ssh_password_authentication == false
+
+- name: Configurar firewall UFW (si está habilitado)
+  block:
+    - name: Instalar UFW
+      ansible.builtin.apt:
+        name: ufw
+        state: present
+
+    - name: Permitir SSH en UFW
+      community.general.ufw:
+        rule: allow
+        port: '22'
+        proto: tcp
+
+    - name: Habilitar UFW
+      community.general.ufw:
+        state: enabled
+        policy: deny
+  when: ufw_enabled | default(false)
+  tags: ['security', 'firewall']
+
+# NOTA: Bluetooth y Avahi se mantienen habilitados para dispositivos inalámbricos
+# e impresoras de red automáticas
+
+- name: Configurar permisos seguros en archivos críticos
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    mode: "{{ item.mode }}"
+  loop:
+    - { path: '/etc/passwd', mode: '0644' }
+    - { path: '/etc/shadow', mode: '0640' }
+    - { path: '/etc/group', mode: '0644' }
+    - { path: '/etc/gshadow', mode: '0640' }
+    - { path: '/etc/ssh/sshd_config', mode: '0600' }
+  tags: ['security', 'permissions']
+
+- name: Configurar banner de login
+  ansible.builtin.copy:
+    dest: /etc/issue.net
+    content: |
+      **************************************************************************
+                            ACCESO AUTORIZADO ÚNICAMENTE
+      **************************************************************************
+
+      Este sistema es propiedad de Clarel y está reservado para uso autorizado.
+      El acceso no autorizado está prohibido y será procesado según la ley.
+      Todas las actividades en este sistema son monitoreadas y registradas.
+
+      **************************************************************************
+    mode: '0644'
+  tags: ['security', 'banner']
+
+# NOTA: Core dumps se mantienen habilitados para diagnóstico de fallos
+# NOTA: Sysctl de seguridad de red no se configura (no requerido para punto de venta)

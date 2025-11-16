@@ -1,0 +1,23 @@
+---
+# Role: services - Configuración de servicios del sistema
+
+- name: Instalar xinetd (solo el paquete)
+  ansible.builtin.apt:
+    name: xinetd
+    state: present
+  tags: ['services', 'xinetd']
+
+
+- name: Configurar servicio NTP para sincronización de hora
+  ansible.builtin.apt:
+    name:
+      - systemd-timesyncd
+    state: present
+  tags: ['services', 'ntp']
+
+- name: Habilitar sincronización de hora
+  ansible.builtin.systemd:
+    name: systemd-timesyncd
+    enabled: true
+    state: started
+  tags: ['services', 'ntp']

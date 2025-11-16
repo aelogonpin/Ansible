@@ -1,0 +1,14 @@
+# Configuración de sudoers para usuario soporte
+# Generado por Ansible - No editar manualmente
+
+# Usuario soporte puede ejecutar todos los comandos sin contraseña
+soporte ALL=(ALL) NOPASSWD: ALL
+
+# Permitir comandos específicos de gestión del sistema
+soporte ALL=(ALL) NOPASSWD: /usr/bin/apt, /usr/bin/apt-get, /usr/bin/dpkg
+soporte ALL=(ALL) NOPASSWD: /usr/bin/systemctl, /usr/bin/service
+soporte ALL=(ALL) NOPASSWD: /usr/sbin/reboot, /usr/sbin/poweroff, /usr/sbin/shutdown
+
+# Configuración de entorno para sudo
+Defaults:soporte !requiretty
+Defaults:soporte env_keep += "SSH_AUTH_SOCK"

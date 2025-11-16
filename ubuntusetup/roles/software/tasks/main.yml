@@ -1,0 +1,127 @@
+---
+# Role: software - Instalación de software y aplicaciones
+
+- name: Instalar dependencias comunes para software
+  ansible.builtin.apt:
+    name:
+      - wget
+      - curl
+      - apt-transport-https
+      - gnupg2
+      - ca-certificates
+      - software-properties-common
+    state: present
+  tags: ['software', 'dependencies']
+
+# Subversion (SVN)
+- name: Instalar Subversion
+  ansible.builtin.apt:
+    name: subversion
+    state: present
+  tags: ['software', 'subversion', 'svn']
+
+# Google Chrome
+- name: Instalar Google Chrome
+  ansible.builtin.include_tasks: chrome.yml
+  tags: ['software', 'chrome']
+
+# Teclado virtual Onboard
+- name: Instalar teclado virtual Onboard
+  ansible.builtin.include_tasks: onboard.yml
+  tags: ['software', 'onboard']
+
+# Rustdesk
+- name: Instalar Rustdesk
+  ansible.builtin.include_tasks: rustdesk.yml
+  tags: ['software', 'rustdesk']
+
+# Grafana Alloy
+- name: Instalar Grafana Alloy
+  ansible.builtin.include_tasks: alloy.yml
+  tags: ['software', 'alloy']
+
+# CMZ - Añadir aquí cuando se conozcan los detalles
+# - name: Instalar CMZ
+#   ansible.builtin.include_tasks: cmz.yml
+#   tags: ['software', 'cmz']
+
+- name: Crear accesos directos en escritorio para todos los usuarios
+  ansible.builtin.file:
+    path: "/home/{{ item }}/Escritorio"
+    state: directory
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: '0755'
+  loop:
+    - soporte
+    - tienda
+    - instalador
+  tags: ['software', 'desktop']
+
+- name: Copiar acceso directo de Chrome al escritorio (desde sistema)
+  ansible.builtin.copy:
+    src: /usr/share/applications/google-chrome.desktop
+    dest: "/home/{{ item }}/Escritorio/google-chrome.desktop"
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: '0755'
+    remote_src: true
+  loop:
+    - soporte
+    - tienda
+    - instalador
+  tags: ['software', 'desktop', 'chrome']
+
+- name: Copiar acceso directo de Rustdesk al escritorio (desde sistema)
+  ansible.builtin.copy:
+    src: /usr/share/applications/rustdesk.desktop
+    dest: "/home/{{ item }}/Escritorio/rustdesk.desktop"
+    owner: "{{ item }}"
+    group: "{{ item }}"
+    mode: '0755'
+    remote_src: true
+  loop:
+    - soporte
+    - tienda
+    - instalador
+  tags: ['software', 'desktop', 'rustdesk']
+  ignore_errors: true
+
+- name: Marcar archivos .desktop como confiables (Chrome) - XFCE 4.18+
+  ansible.builtin.shell: |
+    FILE="/home/{{ item }}/Escritorio/google-chrome.desktop"
+    if [ -f "$FILE" ]; then
+      CHECKSUM=$(sha256sum "$FILE" | awk '{print $1}')
+      sudo -u {{ item }} dbus-launch gio set -t string "$FILE" metadata::xfce-exe-checksum "$CHECKSUM" 2>/dev/null || true
+    fi
+  loop:
+    - soporte
+    - tienda
+    - instalador
+  changed_when: false
+  ignore_errors: true
+  tags: ['software', 'desktop', 'chrome']
+
+- name: Marcar archivos .desktop como confiables (Rustdesk) - XFCE 4.18+
+  ansible.builtin.shell: |
+    FILE="/home/{{ item }}/Escritorio/rustdesk.desktop"
+    if [ -f "$FILE" ]; then
+      CHECKSUM=$(sha256sum "$FILE" | awk '{print $1}')
+      sudo -u {{ item }} dbus-launch gio set -t string "$FILE" metadata::xfce-exe-checksum "$CHECKSUM" 2>/dev/null || true
+    fi
+  loop:
+    - soporte
+    - tienda
+    - instalador
+  changed_when: false
+  ignore_errors: true
+  tags: ['software', 'desktop', 'rustdesk']
+
+- name: Limpiar paquetes .deb descargados
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /tmp/google-chrome-stable_current_amd64.deb
+    - /tmp/rustdesk.deb
+  tags: ['software', 'cleanup']

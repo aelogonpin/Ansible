@@ -1,0 +1,14 @@
+---
+# Handlers para el role printing
+
+- name: restart cups
+  ansible.builtin.systemd:
+    name: cups
+    state: restarted
+  listen: restart cups
+
+- name: restart cups-browsed
+  ansible.builtin.systemd:
+    name: cups-browsed
+    state: restarted
+  listen: restart cups-browsed

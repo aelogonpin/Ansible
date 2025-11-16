@@ -1,0 +1,45 @@
+# Ansible
+*.retry
+.vault_pass
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Ansible facts cache
+/tmp/ansible_facts/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Secrets y claves
+*.pem
+*.key
+*_rsa
+*_rsa.pub
+!soporte_id_rsa.pub
+
+# Backups
+*.bak
+*.backup
+
+# Logs
+/var/log/
+*.log
+
+# Temporary files
+/tmp/
+*.tmp
+
+# OS
+.DS_Store
+Thumbs.db
+.claude
