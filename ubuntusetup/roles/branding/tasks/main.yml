@@ -535,5 +535,5 @@
     - tienda
     - instalador
   changed_when: true
-  ignore_errors: true
+  ignore_errors: false
   tags: ["branding", "icons", "menu"]
