@@ -48,7 +48,8 @@ apt install -y \
     unzip \
     zip \
     build-essential \
-    dbus-x11
+    dbus-x11 \
+    sshpass
 
 echo ""
 echo -e "${GREEN}[3/8] Instalando XFCE y entorno gráfico...${NC}"
@@ -61,7 +62,13 @@ apt install -y \
     lightdm-gtk-greeter \
     thunderbird-locale-es-es \
     dconf-cli \
-    dconf-gsettings-backend
+    dconf-gsettings-backend \
+    locales \
+    language-pack-es \
+    language-pack-es-base \
+    language-pack-gnome-es \
+    keyboard-configuration \
+    console-setup
 
 echo ""
 echo -e "${GREEN}[4/8] Instalando software adicional...${NC}"
@@ -70,7 +77,9 @@ apt install -y \
     onboard \
     onboard-data \
     xinetd \
-    systemd-timesyncd
+    systemd-timesyncd \
+    ufw \
+    xdg-user-dirs
 
 echo ""
 echo -e "${GREEN}[5/8] Instalando CUPS (sistema de impresión)...${NC}"
@@ -152,10 +161,12 @@ echo -e "  Instalación completada exitosamente"
 echo -e "======================================================================${NC}"
 echo ""
 echo "Paquetes instalados:"
-echo "  - Sistema base: apt, curl, wget, git, vim, nano, htop, etc."
-echo "  - Entorno gráfico: XFCE4, LightDM"
+echo "  - Sistema base: apt, curl, wget, git, vim, nano, htop, sshpass, etc."
+echo "  - Entorno gráfico: XFCE4, LightDM, dconf"
+echo "  - Locale e idioma: locales, language-pack-es, keyboard-configuration"
 echo "  - Software: Google Chrome, Rustdesk, Onboard, Subversion"
 echo "  - Servicios: CUPS, xinetd, Grafana Alloy"
+echo "  - Seguridad: UFW, openssh-server"
 echo ""
 echo "Versiones instaladas:"
 google-chrome-stable --version 2>/dev/null || echo "  Chrome: No disponible"

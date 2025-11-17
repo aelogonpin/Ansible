@@ -150,51 +150,57 @@
       </channel>
   tags: ['xfce', 'screensaver', 'onboard']
 
-- name: Crear directorio de configuración XFCE para todos los usuarios
-  ansible.builtin.file:
-    path: "/home/{{ item }}/.config/xfce4/xfconf/xfce-perchannel-xml"
-    state: directory
-    owner: "{{ item }}"
-    group: "{{ item }}"
-    mode: '0755'
-    recurse: true
-  loop:
-    - soporte
-    - tienda
-    - instalador
-  tags: ['xfce', 'config']
+# NOTA: XFCE crea automáticamente los directorios de configuración al iniciar sesión
+# No es necesario crearlos manualmente a menos que se vayan a poblar con archivos
+#- name: Crear directorio de configuración XFCE para todos los usuarios
+#  ansible.builtin.file:
+#    path: "/home/{{ item }}/.config/xfce4/xfconf/xfce-perchannel-xml"
+#    state: directory
+#    owner: "{{ item }}"
+#    group: "{{ item }}"
+#    mode: '0755'
+#    recurse: true
+#  loop:
+#    - soporte
+#    - tienda
+#    - instalador
+#  tags: ['xfce', 'config']
 
-- name: Configurar idioma español en .xprofile para XFCE
-  ansible.builtin.copy:
-    dest: "/home/{{ item }}/.xprofile"
-    owner: "{{ item }}"
-    group: "{{ item }}"
-    mode: '0644'
-    content: |
-      # Configuración de idioma para XFCE
-      export LANG={{ system_locale }}
-      export LANGUAGE={{ system_locale.split('.')[0] }}
-      export LC_ALL={{ system_locale }}
-  loop:
-    - soporte
-    - tienda
-    - instalador
-  tags: ['xfce', 'locale']
+# NOTA: La configuración de locale se hereda globalmente desde /etc/environment y /etc/default/locale
+# No es necesario configurar .xprofile individual por usuario
+#- name: Configurar idioma español en .xprofile para XFCE
+#  ansible.builtin.copy:
+#    dest: "/home/{{ item }}/.xprofile"
+#    owner: "{{ item }}"
+#    group: "{{ item }}"
+#    mode: '0644'
+#    content: |
+#      # Configuración de idioma para XFCE
+#      export LANG={{ system_locale }}
+#      export LANGUAGE={{ system_locale.split('.')[0] }}
+#      export LC_ALL={{ system_locale }}
+#  loop:
+#    - soporte
+#    - tienda
+#    - instalador
+#  tags: ['xfce', 'locale']
 
-- name: Configurar idioma español en .profile
-  ansible.builtin.lineinfile:
-    path: "/home/{{ item }}/.profile"
-    line: "export LANG={{ system_locale }}"
-    regexp: "^export LANG="
-    create: true
-    owner: "{{ item }}"
-    group: "{{ item }}"
-    mode: '0644'
-  loop:
-    - soporte
-    - tienda
-    - instalador
-  tags: ['xfce', 'locale']
+# NOTA: La configuración de locale se hereda globalmente desde /etc/environment
+# No es necesario configurar .profile individual por usuario
+#- name: Configurar idioma español en .profile
+#  ansible.builtin.lineinfile:
+#    path: "/home/{{ item }}/.profile"
+#    line: "export LANG={{ system_locale }}"
+#    regexp: "^export LANG="
+#    create: true
+#    owner: "{{ item }}"
+#    group: "{{ item }}"
+#    mode: '0644'
+#  loop:
+#    - soporte
+#    - tienda
+#    - instalador
+#  tags: ['xfce', 'locale']
 
 #- name: Configurar screensaver para bloqueo automático (5 minutos)
 #  ansible.builtin.template:

@@ -4,14 +4,14 @@
 - name: Configurar timezone
   community.general.timezone:
     name: "{{ system_timezone }}"
-  tags: ['timezone']
+  tags: ["timezone"]
 
 - name: Asegurar que el directorio de locales existe
   ansible.builtin.file:
     path: /var/lib/locales/supported.d
     state: directory
-    mode: '0755'
-  tags: ['locale']
+    mode: "0755"
+  tags: ["locale"]
 
 - name: Instalar paquetes de idioma español
   ansible.builtin.apt:
@@ -22,7 +22,7 @@
       - language-pack-gnome-es
     state: present
     update_cache: false
-  tags: ['locale']
+  tags: ["locale"]
 
 - name: Configurar locale español (es_ES.UTF-8)
   community.general.locale_gen:
@@ -30,7 +30,7 @@
     state: present
   register: locale_gen_result
   failed_when: locale_gen_result.failed
-  tags: ['locale']
+  tags: ["locale"]
 
 - name: Establecer locale por defecto en /etc/default/locale
   ansible.builtin.copy:
@@ -39,57 +39,47 @@
       LANG={{ system_locale }}
       LANGUAGE={{ system_locale.split('.')[0] }}
       LC_ALL={{ system_locale }}
-    mode: '0644'
-  tags: ['locale']
+    mode: "0644"
+  tags: ["locale"]
 
 - name: Actualizar locale con update-locale
   ansible.builtin.command: update-locale LANG={{ system_locale }} LANGUAGE={{ system_locale.split('.')[0] }} LC_ALL={{ system_locale }}
   changed_when: true
   register: update_locale_result
   failed_when: update_locale_result.rc != 0
-  tags: ['locale']
+  tags: ["locale"]
 
 - name: Configurar locale en /etc/environment
   ansible.builtin.lineinfile:
     path: /etc/environment
-    regexp: '^{{ item.key }}='
-    line: '{{ item.key }}={{ item.value }}'
+    regexp: "^{{ item.key }}="
+    line: "{{ item.key }}={{ item.value }}"
     create: true
-    mode: '0644'
+    mode: "0644"
   loop:
-    - { key: 'LANG', value: '{{ system_locale }}' }
-    - { key: 'LANGUAGE', value: '{{ system_locale.split(".")[0] }}' }
-    - { key: 'LC_ALL', value: '{{ system_locale }}' }
-  tags: ['locale']
-
-- name: Configurar locale para todos los usuarios en /etc/profile.d/
-  ansible.builtin.copy:
-    dest: /etc/profile.d/locale.sh
-    content: |
-      export LANG={{ system_locale }}
-      export LANGUAGE={{ system_locale.split('.')[0] }}
-      export LC_ALL={{ system_locale }}
-    mode: '0755'
-  tags: ['locale']
+    - { key: "LANG", value: "{{ system_locale }}" }
+    - { key: "LANGUAGE", value: '{{ system_locale.split(".")[0] }}' }
+    - { key: "LC_ALL", value: "{{ system_locale }}" }
+  tags: ["locale"]
 
 - name: Verificar que locale español está generado
   ansible.builtin.command: locale -a
   register: locale_list
   changed_when: false
   failed_when: "'es_ES.utf8' not in locale_list.stdout"
-  tags: ['locale']
+  tags: ["locale"]
 
 - name: Verificar locale configurado
   ansible.builtin.command: locale
   register: locale_output
   changed_when: false
   failed_when: "'es_ES.UTF-8' not in locale_output.stdout"
-  tags: ['locale']
+  tags: ["locale"]
 
 - name: Mostrar configuración de locale
   ansible.builtin.debug:
     msg: "{{ locale_output.stdout_lines }}"
-  tags: ['locale']
+  tags: ["locale"]
 
 - name: Instalar paquetes base esenciales
   ansible.builtin.apt:
@@ -114,7 +104,7 @@
       - build-essential
     state: present
     update_cache: false
-  tags: ['packages']
+  tags: ["packages"]
 
 - name: Instalar dependencias de XFCE y sistema gráfico
   ansible.builtin.apt:
@@ -126,13 +116,13 @@
       - lightdm-gtk-greeter
       - dbus-x11
     state: present
-  tags: ['packages', 'xfce']
+  tags: ["packages", "xfce"]
 
 - name: Actualizar todos los paquetes del sistema
   ansible.builtin.apt:
     upgrade: dist
     update_cache: true
-  tags: ['upgrade']
+  tags: ["upgrade"]
   when: perform_system_upgrade | default(true)
 
 - name: Instalar paquetes para configuración de teclado
@@ -142,7 +132,7 @@
       - console-setup
     state: present
     update_cache: false
-  tags: ['keyboard']
+  tags: ["keyboard"]
 
 - name: Configurar teclado del sistema (Español con layout Windows)
   ansible.builtin.copy:
@@ -153,16 +143,16 @@
       XKBVARIANT="winkeys"
       XKBOPTIONS=""
       BACKSPACE="guess"
-    mode: '0644'
+    mode: "0644"
   register: keyboard_config
-  tags: ['keyboard']
+  tags: ["keyboard"]
 
 - name: Aplicar configuración de teclado inmediatamente
   ansible.builtin.command: setupcon -k --force
   register: setupcon_result
   failed_when: setupcon_result.rc != 0
   changed_when: true
-  tags: ['keyboard']
+  tags: ["keyboard"]
 
 - name: Reconfigurar keyboard-configuration
   ansible.builtin.shell: |
@@ -170,15 +160,15 @@
   register: dpkg_reconfigure_result
   failed_when: dpkg_reconfigure_result.rc != 0
   changed_when: true
-  tags: ['keyboard']
+  tags: ["keyboard"]
 
 - name: Crear directorio de configuración de teclado XFCE
   ansible.builtin.file:
     path: /etc/xdg/xfce4/xfconf/xfce-perchannel-xml
     state: directory
-    mode: '0755'
+    mode: "0755"
     recurse: true
-  tags: ['keyboard']
+  tags: ["keyboard"]
 
 - name: Configurar teclado para XFCE
   ansible.builtin.copy:
@@ -193,47 +183,47 @@
           <property name="XkbModel" type="string" value="pc105"/>
         </property>
       </channel>
-    mode: '0644'
-  tags: ['keyboard']
+    mode: "0644"
+  tags: ["keyboard"]
 
 - name: Verificar configuración de teclado
   ansible.builtin.command: cat /etc/default/keyboard
   register: keyboard_check
   changed_when: false
   failed_when: "'{{ system_keyboard_layout }}' not in keyboard_check.stdout or 'winkeys' not in keyboard_check.stdout"
-  tags: ['keyboard']
+  tags: ["keyboard"]
 
 - name: Mostrar configuración de teclado aplicada
   ansible.builtin.debug:
     msg: "Teclado configurado: {{ system_keyboard_layout }} con layout Windows (winkeys)"
-  tags: ['keyboard']
+  tags: ["keyboard"]
 
 - name: Crear directorio para scripts personalizados
   ansible.builtin.file:
     path: /opt/scripts
     state: directory
-    mode: '0755'
-  tags: ['directories']
+    mode: "0755"
+  tags: ["directories"]
 
 - name: Crear directorio para logs personalizados
   ansible.builtin.file:
     path: /var/log/clarel
     state: directory
-    mode: '0755'
-  tags: ['directories']
+    mode: "0755"
+  tags: ["directories"]
 
 - name: Configurar hostname si está definido
   ansible.builtin.hostname:
     name: "{{ inventory_hostname }}"
   when: inventory_hostname != "localhost"
-  tags: ['hostname']
+  tags: ["hostname"]
 
 - name: Habilitar servicio SSH
   ansible.builtin.systemd:
     name: ssh
     enabled: true
     state: started
-  tags: ['services']
+  tags: ["services"]
 
 - name: Configurar MOTD personalizado
   ansible.builtin.copy:
@@ -241,11 +231,11 @@
     content: |
       ╔═══════════════════════════════════════════════════════╗
       ║                                                       ║
-      ║          Sistema Xubuntu - Configurado por Clarel    ║
+      ║          Sistema Xubuntu - Configurado por Clarel     ║
       ║                                                       ║
-      ║  Este sistema está gestionado por Ansible            ║
-      ║  Cualquier cambio manual puede ser sobrescrito       ║
+      ║  Este sistema está gestionado por Seidor              ║
+      ║  Cualquier cambio manual puede ser sobrescrito        ║
       ║                                                       ║
       ╚═══════════════════════════════════════════════════════╝
-    mode: '0644'
-  tags: ['motd']
+    mode: "0644"
+  tags: ["motd"]

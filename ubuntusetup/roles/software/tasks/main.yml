@@ -10,6 +10,7 @@
       - gnupg2
       - ca-certificates
       - software-properties-common
+      - xdg-user-dirs
     state: present
   tags: ['software', 'dependencies']
 
@@ -45,51 +46,62 @@
 #   ansible.builtin.include_tasks: cmz.yml
 #   tags: ['software', 'cmz']
 
-- name: Crear accesos directos en escritorio para todos los usuarios
-  ansible.builtin.file:
-    path: "/home/{{ item }}/Escritorio"
-    state: directory
-    owner: "{{ item }}"
-    group: "{{ item }}"
-    mode: '0755'
+- name: Actualizar directorios XDG para todos los usuarios
+  ansible.builtin.shell: |
+    sudo -u {{ item }} xdg-user-dirs-update
   loop:
     - soporte
     - tienda
     - instalador
+  changed_when: false
+  tags: ['software', 'desktop', 'xdg']
+
+- name: Crear directorio de escritorio usando xdg-user-dir para todos los usuarios
+  ansible.builtin.shell: |
+    DESKTOP_DIR=$(sudo -u {{ item }} xdg-user-dir DESKTOP)
+    mkdir -p "$DESKTOP_DIR"
+    chown {{ item }}:{{ item }} "$DESKTOP_DIR"
+    chmod 0755 "$DESKTOP_DIR"
+  loop:
+    - soporte
+    - tienda
+    - instalador
+  changed_when: false
   tags: ['software', 'desktop']
 
-- name: Copiar acceso directo de Chrome al escritorio (desde sistema)
-  ansible.builtin.copy:
-    src: /usr/share/applications/google-chrome.desktop
-    dest: "/home/{{ item }}/Escritorio/google-chrome.desktop"
-    owner: "{{ item }}"
-    group: "{{ item }}"
-    mode: '0755'
-    remote_src: true
+- name: Copiar acceso directo de Chrome al escritorio (usando xdg-user-dir)
+  ansible.builtin.shell: |
+    DESKTOP_DIR=$(sudo -u {{ item }} xdg-user-dir DESKTOP)
+    cp -f /usr/share/applications/google-chrome.desktop "$DESKTOP_DIR/google-chrome.desktop"
+    chown {{ item }}:{{ item }} "$DESKTOP_DIR/google-chrome.desktop"
+    chmod 0755 "$DESKTOP_DIR/google-chrome.desktop"
   loop:
     - soporte
     - tienda
     - instalador
+  changed_when: true
   tags: ['software', 'desktop', 'chrome']
 
-- name: Copiar acceso directo de Rustdesk al escritorio (desde sistema)
-  ansible.builtin.copy:
-    src: /usr/share/applications/rustdesk.desktop
-    dest: "/home/{{ item }}/Escritorio/rustdesk.desktop"
-    owner: "{{ item }}"
-    group: "{{ item }}"
-    mode: '0755'
-    remote_src: true
+- name: Copiar acceso directo de Rustdesk al escritorio (usando xdg-user-dir)
+  ansible.builtin.shell: |
+    DESKTOP_DIR=$(sudo -u {{ item }} xdg-user-dir DESKTOP)
+    if [ -f /usr/share/applications/rustdesk.desktop ]; then
+      cp -f /usr/share/applications/rustdesk.desktop "$DESKTOP_DIR/rustdesk.desktop"
+      chown {{ item }}:{{ item }} "$DESKTOP_DIR/rustdesk.desktop"
+      chmod 0755 "$DESKTOP_DIR/rustdesk.desktop"
+    fi
   loop:
     - soporte
     - tienda
     - instalador
-  tags: ['software', 'desktop', 'rustdesk']
+  changed_when: true
   ignore_errors: true
+  tags: ['software', 'desktop', 'rustdesk']
 
 - name: Marcar archivos .desktop como confiables (Chrome) - XFCE 4.18+
   ansible.builtin.shell: |
-    FILE="/home/{{ item }}/Escritorio/google-chrome.desktop"
+    DESKTOP_DIR=$(sudo -u {{ item }} xdg-user-dir DESKTOP)
+    FILE="$DESKTOP_DIR/google-chrome.desktop"
     if [ -f "$FILE" ]; then
       CHECKSUM=$(sha256sum "$FILE" | awk '{print $1}')
       sudo -u {{ item }} dbus-launch gio set -t string "$FILE" metadata::xfce-exe-checksum "$CHECKSUM" 2>/dev/null || true
@@ -104,7 +116,8 @@
 
 - name: Marcar archivos .desktop como confiables (Rustdesk) - XFCE 4.18+
   ansible.builtin.shell: |
-    FILE="/home/{{ item }}/Escritorio/rustdesk.desktop"
+    DESKTOP_DIR=$(sudo -u {{ item }} xdg-user-dir DESKTOP)
+    FILE="$DESKTOP_DIR/rustdesk.desktop"
     if [ -f "$FILE" ]; then
       CHECKSUM=$(sha256sum "$FILE" | awk '{print $1}')
       sudo -u {{ item }} dbus-launch gio set -t string "$FILE" metadata::xfce-exe-checksum "$CHECKSUM" 2>/dev/null || true
