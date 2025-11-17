@@ -5,39 +5,39 @@
   ansible.builtin.file:
     path: /opt/clarel/branding
     state: directory
-    mode: '0755'
-  tags: ['branding']
+    mode: "0755"
+  tags: ["branding"]
 
 - name: Crear subdirectorios para recursos
   ansible.builtin.file:
     path: "/opt/clarel/branding/{{ item }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   loop:
     - wallpapers
     - logos
     - themes
     - icons
-  tags: ['branding']
+  tags: ["branding"]
 
 - name: Copiar icono corporativo (favicon) a directorio de branding
   ansible.builtin.copy:
     src: favicon.png
     dest: /opt/clarel/branding/icons/clarel-menu-icon.png
-    mode: '0644'
-  tags: ['branding', 'icons', 'menu']
+    mode: "0644"
+  tags: ["branding", "icons", "menu"]
 
 - name: Copiar wallpaper corporativo a directorio de branding
   ansible.builtin.copy:
-    src: image.png
+    src: clarel_1.jpg
     dest: /opt/clarel/branding/wallpapers/clarel-wallpaper.png
-    mode: '0644'
-  tags: ['branding', 'wallpaper']
+    mode: "0644"
+  tags: ["branding", "wallpaper"]
 
 - name: Crear README con instrucciones de branding
   ansible.builtin.copy:
     dest: /opt/clarel/branding/README.txt
-    mode: '0644'
+    mode: "0644"
     content: |
       CONFIGURACIÓN DE BRANDING CORPORATIVO
       =====================================
@@ -78,20 +78,20 @@
       CONTACTO:
       ---------
       Para obtener los recursos de branding, contactar con el departamento de marketing.
-  tags: ['branding']
+  tags: ["branding"]
 
 - name: Crear directorio de configuración global de XFCE
   ansible.builtin.file:
     path: /etc/xdg/xfce4/xfconf/xfce-perchannel-xml
     state: directory
-    mode: '0755'
+    mode: "0755"
     recurse: true
-  tags: ['branding', 'wallpaper']
+  tags: ["branding", "wallpaper"]
 
 - name: Configurar wallpaper GLOBAL en XFCE (para todos los usuarios presentes y futuros)
   ansible.builtin.copy:
     dest: /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml
-    mode: '0644'
+    mode: "0644"
     content: |
       <?xml version="1.0" encoding="UTF-8"?>
       <channel name="xfce4-desktop" version="1.0">
@@ -220,7 +220,7 @@
           </property>
         </property>
       </channel>
-  tags: ['branding', 'wallpaper']
+  tags: ["branding", "wallpaper"]
 
 # La configuración global en /etc/xdg/xfce4/ se aplica automáticamente a TODOS los usuarios
 # (existentes y futuros) cuando inician sesión en XFCE
@@ -230,14 +230,14 @@
   register: uid_1000_user
   changed_when: false
   failed_when: false
-  tags: ['branding', 'wallpaper']
+  tags: ["branding", "wallpaper"]
 
 - name: Obtener el directorio home del usuario UID 1000
   ansible.builtin.shell: "getent passwd 1000 | cut -d: -f6"
   register: uid_1000_home
   changed_when: false
   failed_when: false
-  tags: ['branding', 'wallpaper']
+  tags: ["branding", "wallpaper"]
 
 - name: Crear directorio de configuración XFCE para usuario UID 1000
   ansible.builtin.file:
@@ -245,17 +245,17 @@
     state: directory
     owner: "{{ uid_1000_user.stdout }}"
     group: "{{ uid_1000_user.stdout }}"
-    mode: '0755'
+    mode: "0755"
     recurse: true
   when: uid_1000_user.stdout != ""
-  tags: ['branding', 'wallpaper']
+  tags: ["branding", "wallpaper"]
 
 - name: SOBRESCRIBIR configuración de wallpaper para usuario UID 1000 (forzar cambio)
   ansible.builtin.copy:
     dest: "{{ uid_1000_home.stdout }}/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml"
     owner: "{{ uid_1000_user.stdout }}"
     group: "{{ uid_1000_user.stdout }}"
-    mode: '0644'
+    mode: "0644"
     force: true
     content: |
       <?xml version="1.0" encoding="UTF-8"?>
@@ -386,65 +386,65 @@
         </property>
       </channel>
   when: uid_1000_user.stdout != ""
-  tags: ['branding', 'wallpaper']
+  tags: ["branding", "wallpaper"]
 
 - name: Verificar si existe configuración de LightDM GTK Greeter
   ansible.builtin.stat:
     path: /etc/lightdm/lightdm-gtk-greeter.conf
   register: lightdm_conf
-  tags: ['branding', 'lightdm']
+  tags: ["branding", "lightdm"]
 
 - name: Asegurar que existe sección [greeter] en LightDM
   ansible.builtin.lineinfile:
     path: /etc/lightdm/lightdm-gtk-greeter.conf
     line: "[greeter]"
     create: true
-    mode: '0644'
+    mode: "0644"
     state: present
-  tags: ['branding', 'lightdm']
+  tags: ["branding", "lightdm"]
 
 - name: Configurar wallpaper en pantalla de login LightDM
   ansible.builtin.lineinfile:
     path: /etc/lightdm/lightdm-gtk-greeter.conf
-    regexp: '^#?background='
+    regexp: "^#?background="
     line: "background=/opt/clarel/branding/wallpapers/clarel-wallpaper.png"
     insertafter: '^\[greeter\]'
     state: present
-  tags: ['branding', 'lightdm']
+  tags: ["branding", "lightdm"]
 
 - name: Configurar user-background=false en LightDM (forzar wallpaper corporativo)
   ansible.builtin.lineinfile:
     path: /etc/lightdm/lightdm-gtk-greeter.conf
-    regexp: '^#?user-background='
+    regexp: "^#?user-background="
     line: "user-background=false"
     insertafter: '^\[greeter\]'
     state: present
-  tags: ['branding', 'lightdm']
+  tags: ["branding", "lightdm"]
 
 - name: Configurar teclado en pantalla (Onboard) en LightDM
   ansible.builtin.lineinfile:
     path: /etc/lightdm/lightdm-gtk-greeter.conf
-    regexp: '^#?keyboard='
+    regexp: "^#?keyboard="
     line: "keyboard=onboard"
     insertafter: '^\[greeter\]'
     state: present
-  tags: ['branding', 'lightdm', 'onboard']
+  tags: ["branding", "lightdm", "onboard"]
 
 - name: Habilitar teclado en pantalla por defecto en LightDM
   ansible.builtin.lineinfile:
     path: /etc/lightdm/lightdm-gtk-greeter.conf
-    regexp: '^#?a11y-states='
+    regexp: "^#?a11y-states="
     line: "a11y-states=+keyboard"
     insertafter: '^\[greeter\]'
     state: present
-  tags: ['branding', 'lightdm', 'onboard']
+  tags: ["branding", "lightdm", "onboard"]
 
 # Temas corporativos pueden agregarse en el futuro
 
 - name: Crear script de aplicación de branding
   ansible.builtin.copy:
     dest: /opt/scripts/aplicar-branding.sh
-    mode: '0755'
+    mode: "0755"
     content: |
       #!/bin/bash
       # Script para aplicar branding corporativo
@@ -476,7 +476,7 @@
       echo "2. Editar group_vars/all.yml"
       echo "3. Ejecutar: ansible-playbook playbook.yml --tags branding"
       echo ""
-  tags: ['branding', 'tools']
+  tags: ["branding", "tools"]
 
 - name: Información sobre branding
   ansible.builtin.debug:
@@ -495,7 +495,7 @@
       Directorio de recursos: /opt/clarel/branding/
       Script de ayuda: /opt/scripts/aplicar-branding.sh
       Documentación: /opt/clarel/branding/README.txt
-  tags: ['branding']
+  tags: ["branding"]
 
 # ============================================================================
 # CONFIGURACIÓN DEL ICONO DEL WHISKER MENU
@@ -506,7 +506,7 @@
   ansible.builtin.apt:
     name: xmlstarlet
     state: present
-  tags: ['branding', 'icons', 'menu']
+  tags: ["branding", "icons", "menu"]
 
 - name: Configurar icono del Whisker Menu en xfce4-panel.xml
   ansible.builtin.shell: |
@@ -536,4 +536,4 @@
     - instalador
   changed_when: true
   ignore_errors: true
-  tags: ['branding', 'icons', 'menu']
+  tags: ["branding", "icons", "menu"]
