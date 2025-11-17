@@ -169,6 +169,47 @@
                 <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
               </property>
             </property>
+            <property name="monitorDP-2" type="empty">
+              <property name="workspace0" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+            </property>
+            <property name="monitorDP-3" type="empty">
+              <property name="workspace0" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+            </property>
+            <!-- Configuración para monitores genéricos -->
+            <property name="monitor1" type="empty">
+              <property name="workspace0" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+            </property>
+            <property name="monitor2" type="empty">
+              <property name="workspace0" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+            </property>
+            <property name="monitor3" type="empty">
+              <property name="workspace0" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+            </property>
           </property>
         </property>
       </channel>
@@ -286,6 +327,47 @@
               </property>
             </property>
             <property name="monitorVGA-1" type="empty">
+              <property name="workspace0" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+            </property>
+            <property name="monitorDP-2" type="empty">
+              <property name="workspace0" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+            </property>
+            <property name="monitorDP-3" type="empty">
+              <property name="workspace0" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+            </property>
+            <!-- Configuración para monitores genéricos -->
+            <property name="monitor1" type="empty">
+              <property name="workspace0" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+            </property>
+            <property name="monitor2" type="empty">
+              <property name="workspace0" type="empty">
+                <property name="color-style" type="int" value="0"/>
+                <property name="image-style" type="int" value="5"/>
+                <property name="last-image" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+                <property name="image-path" type="string" value="/opt/clarel/branding/wallpapers/clarel-wallpaper.png"/>
+              </property>
+            </property>
+            <property name="monitor3" type="empty">
               <property name="workspace0" type="empty">
                 <property name="color-style" type="int" value="0"/>
                 <property name="image-style" type="int" value="5"/>

@@ -13,10 +13,23 @@
     mode: '0755'
   tags: ['locale']
 
+- name: Instalar paquetes de idioma español
+  ansible.builtin.apt:
+    name:
+      - locales
+      - language-pack-es
+      - language-pack-es-base
+      - language-pack-gnome-es
+    state: present
+    update_cache: false
+  tags: ['locale']
+
 - name: Configurar locale español (es_ES.UTF-8)
   community.general.locale_gen:
     name: "{{ system_locale }}"
     state: present
+  register: locale_gen_result
+  failed_when: locale_gen_result.failed
   tags: ['locale']
 
 - name: Establecer locale por defecto en /etc/default/locale
@@ -32,12 +45,45 @@
 - name: Actualizar locale con update-locale
   ansible.builtin.command: update-locale LANG={{ system_locale }} LANGUAGE={{ system_locale.split('.')[0] }} LC_ALL={{ system_locale }}
   changed_when: true
+  register: update_locale_result
+  failed_when: update_locale_result.rc != 0
+  tags: ['locale']
+
+- name: Configurar locale en /etc/environment
+  ansible.builtin.lineinfile:
+    path: /etc/environment
+    regexp: '^{{ item.key }}='
+    line: '{{ item.key }}={{ item.value }}'
+    create: true
+    mode: '0644'
+  loop:
+    - { key: 'LANG', value: '{{ system_locale }}' }
+    - { key: 'LANGUAGE', value: '{{ system_locale.split(".")[0] }}' }
+    - { key: 'LC_ALL', value: '{{ system_locale }}' }
+  tags: ['locale']
+
+- name: Configurar locale para todos los usuarios en /etc/profile.d/
+  ansible.builtin.copy:
+    dest: /etc/profile.d/locale.sh
+    content: |
+      export LANG={{ system_locale }}
+      export LANGUAGE={{ system_locale.split('.')[0] }}
+      export LC_ALL={{ system_locale }}
+    mode: '0755'
+  tags: ['locale']
+
+- name: Verificar que locale español está generado
+  ansible.builtin.command: locale -a
+  register: locale_list
+  changed_when: false
+  failed_when: "'es_ES.utf8' not in locale_list.stdout"
   tags: ['locale']
 
 - name: Verificar locale configurado
   ansible.builtin.command: locale
   register: locale_output
   changed_when: false
+  failed_when: "'es_ES.UTF-8' not in locale_output.stdout"
   tags: ['locale']
 
 - name: Mostrar configuración de locale
@@ -89,6 +135,15 @@
   tags: ['upgrade']
   when: perform_system_upgrade | default(true)
 
+- name: Instalar paquetes para configuración de teclado
+  ansible.builtin.apt:
+    name:
+      - keyboard-configuration
+      - console-setup
+    state: present
+    update_cache: false
+  tags: ['keyboard']
+
 - name: Configurar teclado del sistema (Español con layout Windows)
   ansible.builtin.copy:
     dest: /etc/default/keyboard
@@ -99,6 +154,58 @@
       XKBOPTIONS=""
       BACKSPACE="guess"
     mode: '0644'
+  register: keyboard_config
+  tags: ['keyboard']
+
+- name: Aplicar configuración de teclado inmediatamente
+  ansible.builtin.command: setupcon -k --force
+  register: setupcon_result
+  failed_when: setupcon_result.rc != 0
+  changed_when: true
+  tags: ['keyboard']
+
+- name: Reconfigurar keyboard-configuration
+  ansible.builtin.shell: |
+    DEBIAN_FRONTEND=noninteractive dpkg-reconfigure keyboard-configuration
+  register: dpkg_reconfigure_result
+  failed_when: dpkg_reconfigure_result.rc != 0
+  changed_when: true
+  tags: ['keyboard']
+
+- name: Crear directorio de configuración de teclado XFCE
+  ansible.builtin.file:
+    path: /etc/xdg/xfce4/xfconf/xfce-perchannel-xml
+    state: directory
+    mode: '0755'
+    recurse: true
+  tags: ['keyboard']
+
+- name: Configurar teclado para XFCE
+  ansible.builtin.copy:
+    dest: /etc/xdg/xfce4/xfconf/xfce-perchannel-xml/keyboard-layout.xml
+    content: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <channel name="keyboard-layout" version="1.0">
+        <property name="Default" type="empty">
+          <property name="XkbDisable" type="bool" value="false"/>
+          <property name="XkbLayout" type="string" value="{{ system_keyboard_layout }}"/>
+          <property name="XkbVariant" type="string" value="winkeys"/>
+          <property name="XkbModel" type="string" value="pc105"/>
+        </property>
+      </channel>
+    mode: '0644'
+  tags: ['keyboard']
+
+- name: Verificar configuración de teclado
+  ansible.builtin.command: cat /etc/default/keyboard
+  register: keyboard_check
+  changed_when: false
+  failed_when: "'{{ system_keyboard_layout }}' not in keyboard_check.stdout or 'winkeys' not in keyboard_check.stdout"
+  tags: ['keyboard']
+
+- name: Mostrar configuración de teclado aplicada
+  ansible.builtin.debug:
+    msg: "Teclado configurado: {{ system_keyboard_layout }} con layout Windows (winkeys)"
   tags: ['keyboard']
 
 - name: Crear directorio para scripts personalizados
