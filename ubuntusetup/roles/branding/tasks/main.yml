@@ -20,6 +20,13 @@
     - icons
   tags: ['branding']
 
+- name: Copiar icono corporativo (favicon) a directorio de branding
+  ansible.builtin.copy:
+    src: favicon.png
+    dest: /opt/clarel/branding/icons/clarel-menu-icon.png
+    mode: '0644'
+  tags: ['branding', 'icons', 'menu']
+
 - name: Copiar wallpaper corporativo a directorio de branding
   ansible.builtin.copy:
     src: image.png
@@ -476,14 +483,57 @@
     msg: |
       ✅ BRANDING CONFIGURADO
 
+      Icono del menú: /opt/clarel/branding/icons/clarel-menu-icon.png
       Wallpaper corporativo: /opt/clarel/branding/wallpapers/clarel-wallpaper.png
 
-      El wallpaper ha sido aplicado a:
-      - Todos los usuarios (soporte, tienda, instalador)
-      - Todos los workspaces de XFCE
+      Configuración aplicada a:
+      - Icono del Whisker Menu (menú de aplicaciones)
+      - Wallpaper en todos los workspaces de XFCE
       - Pantalla de login de LightDM
+      - Todos los usuarios (soporte, tienda, instalador)
 
       Directorio de recursos: /opt/clarel/branding/
       Script de ayuda: /opt/scripts/aplicar-branding.sh
       Documentación: /opt/clarel/branding/README.txt
   tags: ['branding']
+
+# ============================================================================
+# CONFIGURACIÓN DEL ICONO DEL WHISKER MENU
+# ============================================================================
+# El icono se configura editando el archivo xfce4-panel.xml directamente
+
+- name: Instalar xmlstarlet para manipulación de XML
+  ansible.builtin.apt:
+    name: xmlstarlet
+    state: present
+  tags: ['branding', 'icons', 'menu']
+
+- name: Configurar icono del Whisker Menu en xfce4-panel.xml
+  ansible.builtin.shell: |
+    PANEL_XML="/home/{{ item }}/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml"
+
+    if [ -f "$PANEL_XML" ]; then
+      # Crear backup
+      cp "$PANEL_XML" "$PANEL_XML.bak"
+
+      # Agregar/actualizar button-icon property usando xmlstarlet
+      xmlstarlet ed -L \
+        -s "//property[@name='plugin-1' and @value='whiskermenu']" \
+        -t elem -n "property" -v "" \
+        -i "//property[@name='plugin-1' and @value='whiskermenu']/property[not(@name)]" \
+        -t attr -n "name" -v "button-icon" \
+        -i "//property[@name='plugin-1' and @value='whiskermenu']/property[@name='button-icon']" \
+        -t attr -n "type" -v "string" \
+        -s "//property[@name='plugin-1' and @value='whiskermenu']/property[@name='button-icon']" \
+        -t attr -n "value" -v "/opt/clarel/branding/icons/clarel-menu-icon.png" \
+        "$PANEL_XML" 2>/dev/null || true
+
+      chown {{ item }}:{{ item }} "$PANEL_XML"
+    fi
+  loop:
+    - soporte
+    - tienda
+    - instalador
+  changed_when: true
+  ignore_errors: true
+  tags: ['branding', 'icons', 'menu']
