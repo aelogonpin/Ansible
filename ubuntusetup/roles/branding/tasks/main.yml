@@ -500,40 +500,24 @@
 # ============================================================================
 # CONFIGURACIÓN DEL ICONO DEL WHISKER MENU
 # ============================================================================
-# El icono se configura editando el archivo xfce4-panel.xml directamente
+# Reemplazamos directamente el icono del sistema que usa XFCE por defecto
 
-- name: Instalar xmlstarlet para manipulación de XML
-  ansible.builtin.apt:
-    name: xmlstarlet
-    state: present
+- name: Verificar si el icono original existe
+  ansible.builtin.stat:
+    path: /usr/share/pixmaps/xubuntu-logo-menu.png
+  register: original_icon
   tags: ["branding", "icons", "menu"]
 
-- name: Configurar icono del Whisker Menu en xfce4-panel.xml
-  ansible.builtin.shell: |
-    PANEL_XML="/home/{{ item }}/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-panel.xml"
-
-    if [ -f "$PANEL_XML" ]; then
-      # Crear backup
-      cp "$PANEL_XML" "$PANEL_XML.bak"
-
-      # Agregar/actualizar button-icon property usando xmlstarlet
-      xmlstarlet ed -L \
-        -s "//property[@name='plugin-1' and @value='whiskermenu']" \
-        -t elem -n "property" -v "" \
-        -i "//property[@name='plugin-1' and @value='whiskermenu']/property[not(@name)]" \
-        -t attr -n "name" -v "button-icon" \
-        -i "//property[@name='plugin-1' and @value='whiskermenu']/property[@name='button-icon']" \
-        -t attr -n "type" -v "string" \
-        -s "//property[@name='plugin-1' and @value='whiskermenu']/property[@name='button-icon']" \
-        -t attr -n "value" -v "/opt/clarel/branding/icons/clarel-menu-icon.png" \
-        "$PANEL_XML" 2>/dev/null || true
-
-      chown {{ item }}:{{ item }} "$PANEL_XML"
-    fi
-  loop:
-    - soporte
-    - tienda
-    - instalador
+- name: Hacer backup del icono original de Xubuntu (renombrar)
+  ansible.builtin.command: mv /usr/share/pixmaps/xubuntu-logo-menu.png /usr/share/pixmaps/xubuntu-logo-menu.png.original
+  when: original_icon.stat.exists and not original_icon.stat.islnk
   changed_when: true
-  ignore_errors: false
+  tags: ["branding", "icons", "menu"]
+
+- name: Crear enlace simbólico del icono corporativo al icono del sistema
+  ansible.builtin.file:
+    src: /opt/clarel/branding/icons/clarel-menu-icon.png
+    dest: /usr/share/pixmaps/xubuntu-logo-menu.png
+    state: link
+    force: true
   tags: ["branding", "icons", "menu"]
