@@ -521,3 +521,57 @@
     state: link
     force: true
   tags: ["branding", "icons", "menu"]
+
+# ============================================================================
+# CONFIGURACIÓN DE LOGOS DE PLYMOUTH (Pantalla de arranque)
+# ============================================================================
+
+- name: Copiar logos corporativos a directorio de branding
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/opt/clarel/branding/logos/{{ item }}"
+    mode: "0644"
+  loop:
+    - logo.png
+    - logo_16bit.png
+  tags: ["branding", "plymouth", "logos"]
+
+- name: Verificar si existe logo.png original en Plymouth
+  ansible.builtin.stat:
+    path: /usr/share/plymouth/themes/xubuntu-logo/logo.png
+  register: plymouth_logo
+  tags: ["branding", "plymouth", "logos"]
+
+- name: Hacer backup del logo.png original de Plymouth
+  ansible.builtin.command: mv /usr/share/plymouth/themes/xubuntu-logo/logo.png /usr/share/plymouth/themes/xubuntu-logo/logo.png.bak
+  when: plymouth_logo.stat.exists and not plymouth_logo.stat.islnk
+  changed_when: true
+  tags: ["branding", "plymouth", "logos"]
+
+- name: Verificar si existe logo_16bit.png original en Plymouth
+  ansible.builtin.stat:
+    path: /usr/share/plymouth/themes/xubuntu-logo/logo_16bit.png
+  register: plymouth_logo_16bit
+  tags: ["branding", "plymouth", "logos"]
+
+- name: Hacer backup del logo_16bit.png original de Plymouth
+  ansible.builtin.command: mv /usr/share/plymouth/themes/xubuntu-logo/logo_16bit.png /usr/share/plymouth/themes/xubuntu-logo/logo_16bit.png.bak
+  when: plymouth_logo_16bit.stat.exists and not plymouth_logo_16bit.stat.islnk
+  changed_when: true
+  tags: ["branding", "plymouth", "logos"]
+
+- name: Crear enlace simbólico de logo.png corporativo a Plymouth
+  ansible.builtin.file:
+    src: /opt/clarel/branding/logos/logo.png
+    dest: /usr/share/plymouth/themes/xubuntu-logo/logo.png
+    state: link
+    force: true
+  tags: ["branding", "plymouth", "logos"]
+
+- name: Crear enlace simbólico de logo_16bit.png corporativo a Plymouth
+  ansible.builtin.file:
+    src: /opt/clarel/branding/logos/logo_16bit.png
+    dest: /usr/share/plymouth/themes/xubuntu-logo/logo_16bit.png
+    state: link
+    force: true
+  tags: ["branding", "plymouth", "logos"]
