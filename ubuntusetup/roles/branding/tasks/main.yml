@@ -560,18 +560,23 @@
   changed_when: true
   tags: ["branding", "plymouth", "logos"]
 
-- name: Crear enlace simbólico de logo.png corporativo a Plymouth
-  ansible.builtin.file:
+- name: Copiar logo.png corporativo a Plymouth
+  ansible.builtin.copy:
     src: /opt/clarel/branding/logos/logo.png
     dest: /usr/share/plymouth/themes/xubuntu-logo/logo.png
-    state: link
-    force: true
+    mode: "0644"
+    remote_src: true
   tags: ["branding", "plymouth", "logos"]
 
-- name: Crear enlace simbólico de logo_16bit.png corporativo a Plymouth
-  ansible.builtin.file:
+- name: Copiar logo_16bit.png corporativo a Plymouth
+  ansible.builtin.copy:
     src: /opt/clarel/branding/logos/logo_16bit.png
     dest: /usr/share/plymouth/themes/xubuntu-logo/logo_16bit.png
-    state: link
-    force: true
+    mode: "0644"
+    remote_src: true
+  tags: ["branding", "plymouth", "logos"]
+
+- name: Actualizar initramfs para aplicar cambios en Plymouth
+  ansible.builtin.command: update-initramfs -u
+  changed_when: true
   tags: ["branding", "plymouth", "logos"]
