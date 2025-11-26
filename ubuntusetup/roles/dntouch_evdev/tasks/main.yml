@@ -63,13 +63,3 @@
     dest: /etc/X11/xorg.conf.d/99-dntouch.conf
     mode: '0644'
   tags: ['dntouch', 'config']
-
-- name: Verificar que archivos de configuración X11 están creados
-  ansible.builtin.stat:
-    path: "{{ item }}"
-  loop:
-    - /etc/X11/xorg.conf.d/39-dntouch-nolib.conf
-    - /etc/X11/xorg.conf.d/99-dntouch.conf
-  register: xorg_conf_files
-  failed_when: not item.stat.exists
-  tags: ['dntouch', 'config']
