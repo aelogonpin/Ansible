@@ -44,10 +44,15 @@
     state: present
   tags: ['users', 'instalador']
 
+- name: Calcular fecha de expiración para usuario instalador
+  ansible.builtin.set_fact:
+    instalador_expire_date: "{{ '%Y-%m-%d' | strftime((ansible_date_time.epoch | int) + (users.instalador.expire_days | int * 86400)) }}"
+  tags: ['users', 'instalador', 'security']
+
 - name: Configurar expiración de cuenta para usuario instalador
   chage:
     user: instalador
-    sp_expire: "+{{ users.instalador.expire_days }}"  
+    sp_expire: "{{ instalador_expire_date }}"  # Fecha absoluta en formato YYYY-MM-DD
     sp_warn: 7  # Advertir 7 días antes
   tags: ['users', 'instalador', 'security']
 
