@@ -439,63 +439,6 @@
     state: present
   tags: ["branding", "lightdm", "onboard"]
 
-# Temas corporativos pueden agregarse en el futuro
-
-- name: Crear script de aplicación de branding
-  ansible.builtin.copy:
-    dest: /opt/scripts/aplicar-branding.sh
-    mode: "0755"
-    content: |
-      #!/bin/bash
-      # Script para aplicar branding corporativo
-
-      BRANDING_DIR="/opt/clarel/branding"
-
-      echo "======================================"
-      echo "  Aplicar Branding Corporativo"
-      echo "======================================"
-      echo ""
-
-      # Listar recursos disponibles
-      echo "Recursos disponibles:"
-      echo ""
-      echo "Wallpapers:"
-      ls -1 "$BRANDING_DIR/wallpapers/" 2>/dev/null || echo "  (ninguno)"
-      echo ""
-      echo "Logos:"
-      ls -1 "$BRANDING_DIR/logos/" 2>/dev/null || echo "  (ninguno)"
-      echo ""
-      echo "Temas:"
-      ls -1 "$BRANDING_DIR/themes/" 2>/dev/null || echo "  (ninguno)"
-      echo ""
-
-      echo "======================================"
-      echo ""
-      echo "Para aplicar branding:"
-      echo "1. Copiar recursos a $BRANDING_DIR"
-      echo "2. Editar group_vars/all.yml"
-      echo "3. Ejecutar: ansible-playbook playbook.yml --tags branding"
-      echo ""
-  tags: ["branding", "tools"]
-
-- name: Información sobre branding
-  ansible.builtin.debug:
-    msg: |
-      ✅ BRANDING CONFIGURADO
-
-      Icono del menú: /opt/clarel/branding/icons/clarel-menu-icon.png
-      Wallpaper corporativo: /opt/clarel/branding/wallpapers/clarel-wallpaper.png
-
-      Configuración aplicada a:
-      - Icono del Whisker Menu (menú de aplicaciones)
-      - Wallpaper en todos los workspaces de XFCE
-      - Pantalla de login de LightDM
-      - Todos los usuarios (soporte, tienda, instalador)
-
-      Directorio de recursos: /opt/clarel/branding/
-      Script de ayuda: /opt/scripts/aplicar-branding.sh
-      Documentación: /opt/clarel/branding/README.txt
-  tags: ["branding"]
 
 # ============================================================================
 # CONFIGURACIÓN DEL ICONO DEL WHISKER MENU

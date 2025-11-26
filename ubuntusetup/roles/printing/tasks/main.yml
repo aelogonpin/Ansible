@@ -59,3 +59,5 @@
     state: directory
     mode: '0755'
   tags: ['printing', 'drivers']
+
+### Install drivers for specific printers here if needed ###

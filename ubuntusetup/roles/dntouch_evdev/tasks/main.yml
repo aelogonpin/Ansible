@@ -42,13 +42,6 @@
     - dntouch-beep_2.5.1-2_all.deb
   tags: ['dntouch', 'packages']
 
-- name: Verificar instalación de dntouch
-  ansible.builtin.command: dpkg -l dntouch
-  register: dntouch_installed
-  changed_when: false
-  failed_when: dntouch_installed.rc != 0
-  tags: ['dntouch', 'packages']
-
 
 - name: Desplegar configuración para bloquear libinput
   ansible.builtin.template:

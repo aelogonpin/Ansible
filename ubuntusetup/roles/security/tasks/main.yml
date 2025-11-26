@@ -53,21 +53,5 @@
     - { path: '/etc/ssh/sshd_config', mode: '0600' }
   tags: ['security', 'permissions']
 
-- name: Configurar banner de login
-  ansible.builtin.copy:
-    dest: /etc/issue.net
-    content: |
-      **************************************************************************
-                            ACCESO AUTORIZADO ÚNICAMENTE
-      **************************************************************************
-
-      Este sistema es propiedad de Clarel y está reservado para uso autorizado.
-      El acceso no autorizado está prohibido y será procesado según la ley.
-      Todas las actividades en este sistema son monitoreadas y registradas.
-
-      **************************************************************************
-    mode: '0644'
-  tags: ['security', 'banner']
-
 # NOTA: Core dumps se mantienen habilitados para diagnóstico de fallos
 # NOTA: Sysctl de seguridad de red no se configura (no requerido para punto de venta)

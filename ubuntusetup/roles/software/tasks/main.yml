@@ -41,11 +41,6 @@
   ansible.builtin.include_tasks: alloy.yml
   tags: ['software', 'alloy']
 
-# CMZ - Añadir aquí cuando se conozcan los detalles
-# - name: Instalar CMZ
-#   ansible.builtin.include_tasks: cmz.yml
-#   tags: ['software', 'cmz']
-
 - name: Actualizar directorios XDG para todos los usuarios
   ansible.builtin.shell: |
     sudo -u {{ item }} xdg-user-dirs-update

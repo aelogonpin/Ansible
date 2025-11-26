@@ -6,7 +6,7 @@
     path: /etc/apt/keyrings
     state: directory
     mode: '0755'
-  tags: ['alloy']
+  tags: [ 'alloy' ]
 
 - name: Descargar clave GPG de Grafana (método moderno)
   ansible.builtin.get_url:
@@ -14,65 +14,41 @@
     dest: /etc/apt/keyrings/grafana.asc
     mode: '0644'
     force: true
-  tags: ['alloy']
+  tags: [ 'alloy' ]
 
 - name: Agregar repositorio de Grafana con signed-by
   ansible.builtin.apt_repository:
     repo: "deb [signed-by=/etc/apt/keyrings/grafana.asc] https://apt.grafana.com stable main"
     state: present
     filename: grafana
-  tags: ['alloy']
+  tags: [ 'alloy' ]
 
 - name: Instalar Grafana Alloy
   ansible.builtin.apt:
     name: alloy
     state: present
     update_cache: true
-  tags: ['alloy']
+  tags: [ 'alloy' ]
 
 - name: Verificar instalación de Alloy
   ansible.builtin.command: alloy --version
   register: alloy_version_output
   changed_when: false
   failed_when: false
-  tags: ['alloy']
+  tags: [ 'alloy' ]
 
 - name: Mostrar versión de Alloy instalada
   ansible.builtin.debug:
     msg: "Grafana Alloy instalado: {{ alloy_version_output.stdout }}"
   when: alloy_version_output.rc == 0
-  tags: ['alloy']
+  tags: [ 'alloy' ]
 
 - name: Crear directorio de configuración de Alloy
   ansible.builtin.file:
     path: /etc/alloy
     state: directory
     mode: '0755'
-  tags: ['alloy']
-
-- name: Crear configuración inicial de Alloy (sin configurar)
-  ansible.builtin.copy:
-    dest: /etc/alloy/config.alloy
-    mode: '0644'
-    content: |
-      // Configuración de Grafana Alloy
-      // Este archivo debe ser configurado según las necesidades específicas
-
-      // Ejemplo de configuración básica (comentado)
-      /*
-      logging {
-        level  = "info"
-        format = "logfmt"
-      }
-
-      // Descomentar y configurar según necesidades
-      // prometheus.remote_write "default" {
-      //   endpoint {
-      //     url = "http://your-prometheus-server:9090/api/v1/write"
-      //   }
-      // }
-      */
-  tags: ['alloy']
+  tags: [ 'alloy' ]
 
 - name: Deshabilitar servicio de Alloy (instalado pero no habilitado)
   ansible.builtin.systemd:
@@ -80,37 +56,8 @@
     enabled: false
     state: stopped
   when: not (alloy_enabled | default(false))
-  tags: ['alloy']
+  tags: [ 'alloy' ]
   ignore_errors: true
-
-- name: Crear archivo de documentación para Alloy
-  ansible.builtin.copy:
-    dest: /etc/alloy/README.txt
-    mode: '0644'
-    content: |
-      GRAFANA ALLOY - CONFIGURACIÓN
-      ==============================
-
-      Alloy está instalado pero NO HABILITADO por defecto.
-
-      Para habilitar y configurar Alloy:
-
-      1. Editar el archivo /etc/alloy/config.alloy con la configuración deseada
-      2. Habilitar el servicio:
-         sudo systemctl enable alloy
-      3. Iniciar el servicio:
-         sudo systemctl start alloy
-      4. Verificar el estado:
-         sudo systemctl status alloy
-
-      Documentación oficial:
-      https://grafana.com/docs/alloy/latest/
-
-      Ejemplos de configuración:
-      https://github.com/grafana/alloy/tree/main/examples
-
-      IMPORTANTE: No iniciar el servicio hasta que esté correctamente configurado.
-  tags: ['alloy']
 
 - name: Nota sobre Alloy
   ansible.builtin.debug:
@@ -123,4 +70,4 @@
       3. sudo systemctl start alloy
 
       Documentación en /etc/alloy/README.txt
-  tags: ['alloy']
+  tags: [ 'alloy' ]

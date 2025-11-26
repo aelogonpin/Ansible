@@ -5,34 +5,34 @@
   ansible.builtin.apt_key:
     url: https://dl.google.com/linux/linux_signing_key.pub
     state: present
-  tags: ['chrome']
+  tags: [ 'chrome' ]
 
 - name: Agregar repositorio de Google Chrome
   ansible.builtin.apt_repository:
     repo: "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main"
     state: present
     filename: google-chrome
-  tags: ['chrome']
+  tags: [ 'chrome' ]
 
 - name: Instalar Google Chrome Stable
   ansible.builtin.apt:
     name: google-chrome-stable
     state: present
     update_cache: true
-  tags: ['chrome']
+  tags: [ 'chrome' ]
 
 - name: Verificar instalación de Chrome
   ansible.builtin.command: google-chrome-stable --version
   register: chrome_version_output
   changed_when: false
   failed_when: false
-  tags: ['chrome']
+  tags: [ 'chrome' ]
 
 - name: Mostrar versión de Chrome instalada
   ansible.builtin.debug:
     msg: "Chrome instalado: {{ chrome_version_output.stdout }}"
   when: chrome_version_output.rc == 0
-  tags: ['chrome']
+  tags: [ 'chrome' ]
 
 - name: Configurar Chrome para no solicitar contraseña de keyring
   ansible.builtin.copy:
@@ -44,34 +44,7 @@
       --password-store=basic
       --disable-password-generation
   loop:
-    - soporte
-    - tienda
-    - instalador
-  tags: ['chrome']
-
-- name: Crear directorio de políticas de Chrome
-  ansible.builtin.file:
-    path: /etc/opt/chrome/policies/managed
-    state: directory
-    mode: '0755'
-  tags: ['chrome']
-
-- name: Configurar políticas de Chrome (deshabilitar actualizaciones automáticas, etc)
-  ansible.builtin.copy:
-    dest: /etc/opt/chrome/policies/managed/clarel_policies.json
-    mode: '0644'
-    content: |
-      {
-        "BrowserSignin": 0,
-        "SyncDisabled": true,
-        "PasswordManagerEnabled": false,
-        "AutofillAddressEnabled": false,
-        "AutofillCreditCardEnabled": false,
-        "DefaultBrowserSettingEnabled": false,
-        "MetricsReportingEnabled": false,
-        "SafeBrowsingEnabled": true,
-        "BookmarkBarEnabled": true,
-        "ShowHomeButton": true,
-        "RestoreOnStartup": 1
-      }
-  tags: ['chrome']
+  - soporte
+  - tienda
+  - instalador
+  tags: [ 'chrome' ]

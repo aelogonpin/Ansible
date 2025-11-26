@@ -4,23 +4,10 @@
 - name: Instalar Onboard (teclado virtual)
   ansible.builtin.apt:
     name:
-      - onboard
-      - onboard-data
+    - onboard
+    - onboard-data
     state: present
-  tags: ['onboard']
-
-- name: Verificar instalación de Onboard
-  ansible.builtin.command: onboard --version
-  register: onboard_version_output
-  changed_when: false
-  failed_when: false
-  tags: ['onboard']
-
-- name: Mostrar versión de Onboard instalada
-  ansible.builtin.debug:
-    msg: "Onboard instalado: {{ onboard_version_output.stdout }}"
-  when: onboard_version_output.rc == 0
-  tags: ['onboard']
+  tags: [ 'onboard' ]
 
 - name: Crear directorio de configuración de Onboard
   ansible.builtin.file:
@@ -30,10 +17,10 @@
     group: "{{ item }}"
     mode: '0755'
   loop:
-    - soporte
-    - tienda
-    - instalador
-  tags: ['onboard']
+  - soporte
+  - tienda
+  - instalador
+  tags: [ 'onboard' ]
 
 - name: Configurar Onboard con layout español
   ansible.builtin.copy:
@@ -65,10 +52,10 @@
       auto-show=False
       auto-hide=True
   loop:
-    - soporte
-    - tienda
-    - instalador
-  tags: ['onboard']
+  - soporte
+  - tienda
+  - instalador
+  tags: [ 'onboard' ]
 
 - name: Crear acceso directo para Onboard en autostart (si está habilitado)
   ansible.builtin.copy:
@@ -88,34 +75,8 @@
       X-GNOME-Autostart-enabled=true
       X-GNOME-AutoRestart=true
   loop:
-    - soporte
-    - tienda
-    - instalador
+  - soporte
+  - tienda
+  - instalador
   when: onboard_autostart | default(false)
-  tags: ['onboard', 'autostart']
-
-# DESHABILITADO: No se crea acceso directo de Onboard en escritorio
-# Se mantiene disponible en el menú de aplicaciones
-# - name: Crear acceso directo a Onboard en escritorio
-#   ansible.builtin.copy:
-#     dest: "/home/{{ item }}/Escritorio/onboard.desktop"
-#     owner: "{{ item }}"
-#     group: "{{ item }}"
-#     mode: '0755'
-#     content: |
-#       [Desktop Entry]
-#       Version=1.0
-#       Name=Teclado Virtual
-#       GenericName=On-Screen Keyboard
-#       Comment=Teclado en pantalla
-#       Exec=onboard
-#       Terminal=false
-#       Type=Application
-#       Icon=onboard
-#       Categories=Utility;Accessibility;
-#       StartupNotify=true
-#   loop:
-#     - soporte
-#     - tienda
-#     - instalador
-#   tags: ['onboard', 'desktop']
+  tags: [ 'onboard', 'autostart' ]
