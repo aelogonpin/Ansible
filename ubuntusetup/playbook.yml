@@ -31,6 +31,10 @@
     - role: xfce_config
       tags: ['xfce', 'desktop']
 
+    - role: dntouch_evdev
+      tags: ['dntouch', 'hardware']
+      when: dntouch_enabled | default(false)
+
     - role: software
       tags: ['software', 'apps']
 
@@ -68,9 +72,13 @@
             - Rustdesk
             - Alloy (detenido)
             - Onboard (teclado virtual)
+            - dntouch (si está habilitado)
 
           Configuración XFCE:
             - Bloqueo de pantalla: {{ xfce_screen_lock_timeout }} minutos
+
+          Hardware:
+            - dntouch con driver evdev (si está habilitado)
 
           Nota: Recuerda configurar el branding cuando esté disponible
           ========================================

@@ -1,0 +1,75 @@
+---
+# Role: dntouch_evdev - Configuración de dntouch con driver evdev
+
+- name: Instalar driver evdev para Xorg
+  ansible.builtin.apt:
+    name: xserver-xorg-input-evdev
+    state: present
+    update_cache: false
+  tags: ['dntouch', 'packages']
+
+- name: Copiar paquetes dntouch a /tmp
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: "/tmp/{{ item }}"
+    mode: '0644'
+  loop:
+    - dntouch-udev_2.5.1-2_all.deb
+    - dntouch-support_2.5.1-2_amd64.deb
+    - dntouch_2.5.1-2_amd64.deb
+    - dntouch-beep_2.5.1-2_all.deb
+  tags: ['dntouch', 'packages']
+
+- name: Instalar paquetes dntouch (en orden correcto)
+  ansible.builtin.apt:
+    deb: "/tmp/{{ item }}"
+    state: present
+  loop:
+    - dntouch-udev_2.5.1-2_all.deb
+    - dntouch-support_2.5.1-2_amd64.deb
+    - dntouch_2.5.1-2_amd64.deb
+    - dntouch-beep_2.5.1-2_all.deb
+  tags: ['dntouch', 'packages']
+
+- name: Limpiar paquetes temporales de /tmp
+  ansible.builtin.file:
+    path: "/tmp/{{ item }}"
+    state: absent
+  loop:
+    - dntouch-udev_2.5.1-2_all.deb
+    - dntouch-support_2.5.1-2_amd64.deb
+    - dntouch_2.5.1-2_amd64.deb
+    - dntouch-beep_2.5.1-2_all.deb
+  tags: ['dntouch', 'packages']
+
+- name: Verificar instalación de dntouch
+  ansible.builtin.command: dpkg -l dntouch
+  register: dntouch_installed
+  changed_when: false
+  failed_when: dntouch_installed.rc != 0
+  tags: ['dntouch', 'packages']
+
+
+- name: Desplegar configuración para bloquear libinput
+  ansible.builtin.template:
+    src: 39-dntouch-nolib.conf.j2
+    dest: /etc/X11/xorg.conf.d/39-dntouch-nolib.conf
+    mode: '0644'
+  tags: ['dntouch', 'config']
+
+- name: Desplegar configuración de dntouch con evdev
+  ansible.builtin.template:
+    src: 99-dntouch.conf.j2
+    dest: /etc/X11/xorg.conf.d/99-dntouch.conf
+    mode: '0644'
+  tags: ['dntouch', 'config']
+
+- name: Verificar que archivos de configuración X11 están creados
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - /etc/X11/xorg.conf.d/39-dntouch-nolib.conf
+    - /etc/X11/xorg.conf.d/99-dntouch.conf
+  register: xorg_conf_files
+  failed_when: not item.stat.exists
+  tags: ['dntouch', 'config']

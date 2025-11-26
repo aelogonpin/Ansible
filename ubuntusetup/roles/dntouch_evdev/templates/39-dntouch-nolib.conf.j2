@@ -1,0 +1,7 @@
+# Force dntouch0 to NOT use libinput (processed before 40-libinput.conf)
+# This file is managed by Ansible - DO NOT EDIT MANUALLY
+Section "InputClass"
+        Identifier "dntouch no libinput"
+        MatchProduct "dntouch0"
+        Driver ""
+EndSection
