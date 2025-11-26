@@ -1,0 +1,119 @@
+---
+- name: test chage module
+  hosts: all
+  gather_facts: False
+
+  tasks:
+
+  - name: create testuser
+    user: name=testuser state=present
+
+  - name: pwunconv (removes /etc/shadow)
+    command: pwunconv
+
+  - name: try module when /etc/shadow does not exist (FAILED is good)
+    chage: user=testuser
+    ignore_errors: yes
+    register: st
+
+  - name: assert previous task failed with No such file or directory (skipping is good)
+    fail: msg="st.failed is not True or No such file or directory not in msg"
+    when: "st.failed != True or 'No such file or directory' not in st.msg"
+
+  - name: pwconv (creates /etc/shadow)
+    command: pwconv
+
+  # check set returns changed value
+
+  - name: set testuser sp_lstchg=3
+    chage: user=testuser sp_lstchg=3
+    register: st
+
+  - name: assert returned sp_lstchg is set correctly
+    fail: msg=failed
+    when: "{{st.shadow['sp_lstchg']}} != 3"
+
+  # check that setting to a different using the alias makes a change
+  
+  - name: set lastday to 2
+    chage: user=testuser lastday=2
+    register: st
+
+  - name: fail if previous task didn't change
+    fail: msg="st.changed is not True"
+    when: "st.changed != True"
+
+  - name: set sp_expire with date string
+    chage: user=testuser sp_expire=1990-06-30
+    register: st
+
+  - debug: var=st
+    
+  - name: fail if previous task didn't change
+    fail: msg="st.changed is not True"
+    when: "st.changed != True"
+
+  - name: check sp_expire idempotence and with digits and alias
+    chage: user=testuser expiredate=7485
+    register: st
+
+  - name: fail if previous task changed
+    fail: msg="st.changed is True"
+    when: "st.changed == True"
+
+  - name: sp_expire with -1
+    chage: user=testuser sp_expire=-1
+    register: st
+
+  - name: assert returned sp_expire is empty
+    fail: msg="sp_expire is not empty"
+    when: "{{ st.shadow['sp_expire'] != '' }}"
+
+  - name: check sp_inact idempotence with -1
+    chage: user=testuser sp_inact=-1
+
+  - chage: user=testuser sp_inact=-1
+    register: st
+
+  - name: fail if previous task changed
+    fail: msg="st.changed is True"
+    when: "st.changed == True"
+  
+  # check 2 sets at once
+  
+  - name: set sp_min and sp_max to 0
+    chage: user=testuser sp_min=0 sp_max=0
+
+  - name: change two things at one
+    chage: user=testuser sp_min=7 sp_max=28
+    register: st
+
+  - name: assert sp_min is 7 and sp_max is 28 (skipping is good)
+    fail: msg="either (sp_min is not 7) or (sp_max is not 28)"
+    when: "{{st.shadow['sp_min']}} != 7 or {{st.shadow['sp_max']}} != 28"
+
+  - name: assert st.changed == True (skips if ok)
+    fail: msg="st.changed is not True"
+    when: "st.changed != True"
+
+  - name: test get
+    chage: user=testuser
+    register: st
+
+  - name: test st.shadow.sp_max == 28 (skips if ok)
+    fail: msg="sp_max is not 28"
+    when: "{{st.shadow['sp_max']}} != 28"
+
+  - name: remove user testuser
+    user: name=testuser state=absent
+
+  - name: test get on user which doesn't exist (FAILED is good)
+    chage: user=testuser
+    ignore_errors: yes
+    register: st
+
+  - name: assert previous task failed (skipping is good)
+    fail: msg="st.failed is no True"
+    when: "st.failed != True"
+
+  - debug: msg="All tests successful!"

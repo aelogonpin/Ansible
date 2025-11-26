@@ -1,0 +1,7 @@
+---
+# Roles externos de Ansible Galaxy para uso offline
+# Instalar con: ansible-galaxy install -r requirements.yml -p roles/galaxy
+
+roles:
+  - name: lqueryvg.chage
+    version: master

@@ -231,7 +231,7 @@
     content: |
       ╔═══════════════════════════════════════════════════════╗
       ║                                                       ║
-      ║          Sistema Xubuntu - Configurado por Clarel     ║
+      ║          Sistema Clarel - Configurado por Clarel      ║
       ║                                                       ║
       ║  Este sistema está gestionado por Seidor              ║
       ║  Cualquier cambio manual puede ser sobrescrito        ║
@@ -240,60 +240,13 @@
     mode: "0644"
   tags: ["motd"]
 
-- name: Instalar dependencias para MariaDB
-  ansible.builtin.apt:
-    name:
-      - software-properties-common
-      - dirmngr
-      - apt-transport-https
-    state: present
-    update_cache: false
-  tags: ["mariadb", "database"]
+#- name: Instalar MariaDB Server 10.11
+#  ansible.builtin.apt:
+#    name:
+#      - mariadb-server
+#      - mariadb-client
+#      - python3-pymysql
+#    state: present
+#    update_cache: true
+#  tags: ["mariadb", "database"]
 
-- name: Añadir clave GPG del repositorio oficial de MariaDB
-  ansible.builtin.apt_key:
-    url: https://mariadb.org/mariadb_release_signing_key.asc
-    state: present
-  tags: ["mariadb", "database"]
-
-- name: Detectar versión de Ubuntu
-  ansible.builtin.command: lsb_release -sc
-  register: ubuntu_codename
-  changed_when: false
-  tags: ["mariadb", "database"]
-
-- name: Añadir repositorio oficial de MariaDB 10.11
-  ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64] https://downloads.mariadb.com/MariaDB/mariadb-10.11/repo/ubuntu {{ ubuntu_codename.stdout }} main"
-    state: present
-    filename: mariadb
-    update_cache: true
-  tags: ["mariadb", "database"]
-
-- name: Instalar MariaDB Server 10.11
-  ansible.builtin.apt:
-    name:
-      - mariadb-server
-      - mariadb-client
-      - python3-pymysql
-    state: present
-    update_cache: true
-  tags: ["mariadb", "database"]
-
-- name: Asegurar que MariaDB está iniciado y habilitado
-  ansible.builtin.systemd:
-    name: mariadb
-    state: started
-    enabled: true
-  tags: ["mariadb", "database"]
-
-- name: Verificar versión de MariaDB instalada
-  ansible.builtin.command: mysql --version
-  register: mariadb_version
-  changed_when: false
-  tags: ["mariadb", "database"]
-
-- name: Mostrar versión de MariaDB instalada
-  ansible.builtin.debug:
-    msg: "{{ mariadb_version.stdout }}"
-  tags: ["mariadb", "database"]

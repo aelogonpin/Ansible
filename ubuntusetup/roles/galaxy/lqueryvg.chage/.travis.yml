@@ -1,0 +1,24 @@
+---
+sudo: required
+language: python
+python: "2.7"
+
+services:
+  - docker
+
+before_install:
+  - ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa
+
+install:
+  - pip install ansible
+
+before_script: cd tests
+
+script:
+  - make test
+
+notifications:
+  email:
+    on_success: never
+  webhooks: https://galaxy.ansible.com/api/v1/notifications/
+

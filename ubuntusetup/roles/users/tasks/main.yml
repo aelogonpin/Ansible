@@ -45,9 +45,10 @@
   tags: ['users', 'instalador']
 
 - name: Configurar expiración de cuenta para usuario instalador
-  ansible.builtin.command:
-    cmd: "chage -M {{ users.instalador.expire_days }} -W 7 instalador"
-  changed_when: true
+  chage:
+    user: instalador
+    sp_expire: "+{{ users.instalador.expire_days }}"  
+    sp_warn: 7  # Advertir 7 días antes
   tags: ['users', 'instalador', 'security']
 
 - name: Crear directorio .ssh para usuario soporte

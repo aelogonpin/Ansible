@@ -62,10 +62,14 @@
 - [ ] Verificar si hay más software específico de tienda
 
 ### 🎨 Branding
-- [ ] Configuración de branding personalizado (cuando esté disponible)
-- [ ] Logos de Clarel [Logos Customizados]
+- [x] Configuración de branding personalizado (cuando esté disponible)
+- [x] Logos de Clarel [Logos Customizados]
 - [x] Fondos de pantalla personalizados
 
+### 🔧 dntouch
+- [x] Configuración de drivers (deb)
+- [x] Packages for Xorg [Logos Customizados]
+- [x] Emualacion del click derecho
 
 ### 🧪 Testing
 - [ ] Probar instalación completa en máquina limpia

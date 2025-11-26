@@ -22,6 +22,9 @@
     - role: base
       tags: ['base', 'system']
 
+    - role: lqueryvg.chage
+      tags: ['always']
+
     - role: users
       tags: ['users', 'security']
 

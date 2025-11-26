@@ -85,6 +85,23 @@ ansible --version
 
 ## Configuración Inicial
 
+### 0. Instalar Dependencias de Galaxy (roles externos)
+
+Este proyecto usa roles externos de Ansible Galaxy que están incluidos en el directorio `roles/galaxy/` para uso offline.
+
+Si necesitas reinstalarlos o actualizarlos:
+
+```bash
+# Instalar roles desde requirements.yml
+ansible-galaxy install -r requirements.yml -p roles/galaxy
+
+# Verificar roles instalados
+ansible-galaxy list -p roles/galaxy
+```
+
+**Roles incluidos:**
+- `lqueryvg.chage`: Módulo para gestión avanzada de expiración de contraseñas (reemplaza comandos `chage`)
+
 ### 1. Configurar Variables
 
 Editar `group_vars/all.yml` y personalizar:
